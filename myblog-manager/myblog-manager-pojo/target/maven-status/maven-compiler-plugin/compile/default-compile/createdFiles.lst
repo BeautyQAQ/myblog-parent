@@ -1,0 +1,15 @@
+com\myblog\pojo\TbUserExample$Criteria.class
+com\myblog\pojo\TbUserExample.class
+com\myblog\pojo\TbUserlogExample$GeneratedCriteria.class
+com\myblog\pojo\TbUserlogExample.class
+com\myblog\pojo\TbArticleExample.class
+com\myblog\pojo\TbUserlogExample$Criterion.class
+com\myblog\pojo\TbUserlogExample$Criteria.class
+com\myblog\pojo\TbArticleExample$Criterion.class
+com\myblog\pojo\TbArticleExample$Criteria.class
+com\myblog\pojo\TbUserlog.class
+com\myblog\pojo\TbUser.class
+com\myblog\pojo\TbUserExample$GeneratedCriteria.class
+com\myblog\pojo\TbArticle.class
+com\myblog\pojo\TbArticleExample$GeneratedCriteria.class
+com\myblog\pojo\TbUserExample$Criterion.class

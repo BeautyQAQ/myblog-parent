@@ -1,0 +1,3 @@
+com\myblog\mapper\TbUserMapper.class
+com\myblog\mapper\TbArticleMapper.class
+com\myblog\mapper\TbUserlogMapper.class

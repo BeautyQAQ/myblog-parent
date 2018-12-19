@@ -1,0 +1,988 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="9a7322b9-b68c-404b-8f2e-b31efde86df2" name="Default Changelist" comment="" />
+    <ignored path="$PROJECT_DIR$/out/" />
+    <ignored path="$PROJECT_DIR$/target/" />
+    <ignored path="$PROJECT_DIR$/myblog-portal/target/" />
+    <ignored path="$PROJECT_DIR$/myblog-common/target/" />
+    <ignored path="$PROJECT_DIR$/myblog-portal/myblog-portal-interface/target/" />
+    <ignored path="$PROJECT_DIR$/myblog-portal/myblog-portal-service/target/" />
+    <ignored path="$PROJECT_DIR$/myblog-manager/target/" />
+    <ignored path="$PROJECT_DIR$/myblog-manager/myblog-manager-pojo/target/" />
+    <ignored path="$PROJECT_DIR$/myblog-manager/myblog-manager-dao/target/" />
+    <ignored path="$PROJECT_DIR$/myblog-manager/myblog-manager-interface/target/" />
+    <ignored path="$PROJECT_DIR$/myblog-manager/myblog-manager-service/target/" />
+    <ignored path="$PROJECT_DIR$/myblog-portal-web/target/" />
+    <ignored path="$PROJECT_DIR$/myblog-manager-web/target/" />
+    <ignored path="$PROJECT_DIR$/myblog-sso/target/" />
+    <ignored path="$PROJECT_DIR$/myblog-sso/myblog-sso-interface/target/" />
+    <ignored path="$PROJECT_DIR$/myblog-sso/myblog-sso-service/target/" />
+    <ignored path="$PROJECT_DIR$/mblog-sso-web/target/" />
+    <ignored path="$PROJECT_DIR$/myblog-sso-web/target/" />
+    <ignored path="$PROJECT_DIR$/myblog-so-web/target/" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/myblog-manager-web/src/main/java/com/myblog/controller/ArticleController.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="331">
+              <caret line="92" column="9" lean-forward="true" selection-start-line="92" selection-start-column="9" selection-end-line="92" selection-end-column="9" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/myblog-manager-web/src/main/webapp/js/editor.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="331">
+              <caret line="111" column="43" lean-forward="true" selection-start-line="111" selection-start-column="43" selection-end-line="111" selection-end-column="43" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/myblog-manager-web/src/main/webapp/WEB-INF/jsp/index.jsp">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/myblog-common/src/main/java/com/myblog/common/utils/Result.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="342">
+              <caret line="22" lean-forward="true" selection-start-line="22" selection-end-line="22" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/myblog-portal-web/src/main/webapp/WEB-INF/jsp/index.jsp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="488">
+              <caret line="84" column="33" lean-forward="true" selection-start-line="84" selection-start-column="33" selection-end-line="84" selection-end-column="33" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/myblog-manager/myblog-manager-dao/src/main/java/com/myblog/mapper/TbArticleMapper.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="342">
+              <caret line="21" lean-forward="true" selection-start-line="21" selection-end-line="21" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/myblog-manager-web/src/main/webapp/WEB-INF/jsp/article_admin.jsp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="169">
+              <caret line="114" column="63" lean-forward="true" selection-start-line="114" selection-start-column="63" selection-end-line="114" selection-end-column="63" />
+              <folding>
+                <element signature="n#style#0;n#ul#1;n#div#1;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="Class" />
+        <option value="Jsp File" />
+      </list>
+    </option>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>.bd</find>
+      <find>body</find>
+      <find>uploadFile</find>
+      <find>emp_update_btn</find>
+      <find>edit_btn</find>
+      <find>tabs</find>
+      <find>bd</find>
+      <find>selectByPrimaryKey</find>
+      <find>fa fa-chevron-up fa-3x</find>
+      <find>ILLEGAL_CHARACTER</find>
+      <find>&lt;</find>
+      <find>tbpage</find>
+      <find>insert</find>
+      <find>/bootstrap-tagsinput.css&quot;</find>
+      <find>fonts</find>
+      <find>selectAllOrderByHeat</find>
+      <find>是否有</find>
+      <find>#</find>
+      <find>toast-message</find>
+      <find>..</find>
+      <find>selectb</find>
+      <find>href</find>
+      <find>.html</find>
+      <find>check_item</find>
+      <find>E3Result</find>
+      <find>&lt;artifactId&gt;myblog-manager-pojo&lt;/artifactId&gt;</find>
+      <find>&lt;artifactId&gt;myblog-common&lt;/artifactId&gt;</find>
+      <find>ArticleResult</find>
+      <find>update</find>
+      <find>add</find>
+    </findStrings>
+    <replaceStrings>
+      <replace>picture</replace>
+      <replace>result</replace>
+      <replace>Result</replace>
+    </replaceStrings>
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/myblog-manager/myblog-manager-dao/src/main/java/com/myblog/mapper/TbArticleMapper.xml" />
+        <option value="$PROJECT_DIR$/myblog-portal-web/src/main/webapp/WEB-INF/jsp/userspace/blog.html" />
+        <option value="$PROJECT_DIR$/myblog-portal-web/src/main/webapp/WEB-INF/web.xml" />
+        <option value="$PROJECT_DIR$/myblog-portal-web/src/main/webapp/WEB-INF/jsp/userspace/blog.jsp" />
+        <option value="$PROJECT_DIR$/myblog-portal-web/src/main/java/com/myblog/portal/controller/PortalArticleController.java" />
+        <option value="$PROJECT_DIR$/myblog-portal-web/src/main/webapp/WEB-INF/jsp/fragments/footer.jsp" />
+        <option value="$PROJECT_DIR$/myblog-common/src/main/java/com/myblog/common/utils/DateTimeUtil.java" />
+        <option value="$PROJECT_DIR$/myblog-manager/myblog-manager-service/src/main/java/com/myblog/service/impl/ArticleServiceImpl.java" />
+        <option value="$PROJECT_DIR$/myblog-portal-web/src/main/webapp/WEB-INF/jsp/index.jsp" />
+        <option value="$PROJECT_DIR$/myblog-portal-web/src/main/webapp/WEB-INF/jsp/blog.jsp" />
+        <option value="$PROJECT_DIR$/myblog-common/src/main/java/com/myblog/common/jedis/JedisClient.java" />
+        <option value="$PROJECT_DIR$/myblog-sso/pom.xml" />
+        <option value="$PROJECT_DIR$/myblog-sso/myblog-sso-service/pom.xml" />
+        <option value="$PROJECT_DIR$/myblog-sso/myblog-sso-service/src/main/resources/conf/db.properties" />
+        <option value="$PROJECT_DIR$/myblog-sso/myblog-sso-service/src/main/resources/conf/resource.properties" />
+        <option value="$PROJECT_DIR$/myblog-sso/myblog-sso-service/src/main/resources/spring/applicationContext-redis.xml" />
+        <option value="$PROJECT_DIR$/myblog-sso-web/src/main/resources/conf/resource.properties" />
+        <option value="$PROJECT_DIR$/myblog-sso-web/src/main/webapp/WEB-INF/jsp/fragments/header.jsp" />
+        <option value="$PROJECT_DIR$/myblog-sso/myblog-sso-interface/src/main/java/com/mybog/sso/service/LoginService.java" />
+        <option value="$PROJECT_DIR$/myblog-sso/myblog-sso-interface/src/main/java/com/mybog/sso/service/RegisterService.java" />
+        <option value="$PROJECT_DIR$/myblog-sso/myblog-sso-interface/src/main/java/com/mybog/sso/service/TokenService.java" />
+        <option value="$PROJECT_DIR$/myblog-sso/myblog-sso-service/src/main/java/com/myblog/sso/service/impl/LoginServiceImpl.java" />
+        <option value="$PROJECT_DIR$/myblog-sso/myblog-sso-service/src/main/java/com/myblog/sso/service/impl/RegisterServiceImpl.java" />
+        <option value="$PROJECT_DIR$/myblog-sso/myblog-sso-service/src/main/java/com/myblog/sso/service/impl/TokenServiceImpl.java" />
+        <option value="$PROJECT_DIR$/myblog-sso-web/src/main/java/com/myblog/sso/controller/RegitsterController.java" />
+        <option value="$PROJECT_DIR$/myblog-sso-web/src/main/java/com/myblog/sso/controller/TokenController.java" />
+        <option value="$PROJECT_DIR$/myblog-common/src/main/java/com/myblog/common/utils/CookieUtils.java" />
+        <option value="$PROJECT_DIR$/myblog-sso-web/src/main/webapp/WEB-INF/jsp/register.jsp" />
+        <option value="$PROJECT_DIR$/myblog-sso-web/src/main/java/com/myblog/sso/controller/LoginController.java" />
+        <option value="$PROJECT_DIR$/myblog-sso-web/src/main/webapp/WEB-INF/jsp/login.jsp" />
+        <option value="$PROJECT_DIR$/myblog-sso-web/src/main/resources/spring/springmvc.xml" />
+        <option value="$PROJECT_DIR$/myblog-sso/myblog-sso-service/src/main/resources/spring/applicationContext-service.xml" />
+        <option value="$PROJECT_DIR$/myblog-common/pom.xml" />
+        <option value="$PROJECT_DIR$/myblog-manager/myblog-manager-dao/pom.xml" />
+        <option value="$PROJECT_DIR$/myblog-manager/myblog-manager-interface/pom.xml" />
+        <option value="$PROJECT_DIR$/myblog-portal/myblog-portal-interface/pom.xml" />
+        <option value="$PROJECT_DIR$/myblog-portal-web/pom.xml" />
+        <option value="$PROJECT_DIR$/myblog-sso/myblog-sso-interface/pom.xml" />
+        <option value="$PROJECT_DIR$/myblog-portal/myblog-portal-interface/src/main/java/com/myblog/portal/service/ArticlePageService.java" />
+        <option value="$PROJECT_DIR$/myblog-sso/myblog-sso-service/src/main/resources/spring/applicationContext-dao.xml" />
+        <option value="$PROJECT_DIR$/myblog-sso/myblog-sso-service/src/main/resources/spring/applicationContext-trans.xml" />
+        <option value="$PROJECT_DIR$/myblog-sso-web/pom.xml" />
+        <option value="$PROJECT_DIR$/myblog-so-web/pom.xml" />
+        <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/myblog-portal-web/src/main/webapp/WEB-INF/jsp/fragments/header.jsp" />
+        <option value="$PROJECT_DIR$/myblog-portal/myblog-portal-service/src/main/resources/spring/applicationContext-redis.xml" />
+        <option value="$PROJECT_DIR$/myblog-portal/myblog-portal-service/src/main/resources/conf/resource.properties" />
+        <option value="$PROJECT_DIR$/myblog-portal/myblog-portal-service/src/main/java/com/myblog/portal/service/impl/ArticlePageServiceImpl.java" />
+        <option value="$PROJECT_DIR$/myblog-manager-web/src/main/webapp/WEB-INF/jsp/article_admin.jsp" />
+        <option value="$PROJECT_DIR$/myblog-manager-web/src/main/webapp/js/editor.js" />
+        <option value="$PROJECT_DIR$/myblog-manager-web/src/main/java/com/myblog/controller/ArticleController.java" />
+      </list>
+    </option>
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHome" value="D:/apache-maven-3.6.0-bin/apache-maven-3.6.0" />
+        <option name="userSettingsFile" value="D:\apache-maven-3.6.0-bin\apache-maven-3.6.0\conf\settings.xml" />
+      </MavenGeneralSettings>
+    </option>
+    <option name="importingSettings">
+      <MavenImportingSettings>
+        <option name="importAutomatically" value="true" />
+      </MavenImportingSettings>
+    </option>
+  </component>
+  <component name="MavenProjectNavigator">
+    <treeState>
+      <expand>
+        <path>
+          <item name="" type="16c1761:MavenProjectsStructure$RootNode" />
+          <item name="myblog-parent" type="9519ce18:MavenProjectsStructure$ProjectNode" />
+        </path>
+        <path>
+          <item name="" type="16c1761:MavenProjectsStructure$RootNode" />
+          <item name="myblog-parent" type="9519ce18:MavenProjectsStructure$ProjectNode" />
+          <item name="Lifecycle" type="58874e2:MavenProjectsStructure$LifecycleNode" />
+        </path>
+      </expand>
+      <select />
+    </treeState>
+  </component>
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="70" />
+    <option name="y" value="40" />
+    <option name="width" value="1750" />
+    <option name="height" value="970" />
+  </component>
+  <component name="ProjectView">
+    <navigator proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="PackagesPane" />
+      <pane id="Scope" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="myblog-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="myblog-parent" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="myblog-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="myblog-parent" type="462c0819:PsiDirectoryNode" />
+              <item name="myblog-common" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="myblog-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="myblog-parent" type="462c0819:PsiDirectoryNode" />
+              <item name="myblog-common" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="myblog-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="myblog-parent" type="462c0819:PsiDirectoryNode" />
+              <item name="myblog-common" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="myblog-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="myblog-parent" type="462c0819:PsiDirectoryNode" />
+              <item name="myblog-common" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="myblog-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="myblog-parent" type="462c0819:PsiDirectoryNode" />
+              <item name="myblog-common" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="common" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="myblog-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="myblog-parent" type="462c0819:PsiDirectoryNode" />
+              <item name="myblog-common" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="common" type="462c0819:PsiDirectoryNode" />
+              <item name="utils" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="myblog-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="myblog-parent" type="462c0819:PsiDirectoryNode" />
+              <item name="myblog-manager-web" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="myblog-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="myblog-parent" type="462c0819:PsiDirectoryNode" />
+              <item name="myblog-manager-web" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="myblog-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="myblog-parent" type="462c0819:PsiDirectoryNode" />
+              <item name="myblog-manager-web" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="myblog-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="myblog-parent" type="462c0819:PsiDirectoryNode" />
+              <item name="myblog-manager-web" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="myblog-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="myblog-parent" type="462c0819:PsiDirectoryNode" />
+              <item name="myblog-manager-web" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="controller" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="myblog-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="myblog-parent" type="462c0819:PsiDirectoryNode" />
+              <item name="myblog-manager-web" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="webapp" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="myblog-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="myblog-parent" type="462c0819:PsiDirectoryNode" />
+              <item name="myblog-manager-web" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="webapp" type="462c0819:PsiDirectoryNode" />
+              <item name="js" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="myblog-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="myblog-parent" type="462c0819:PsiDirectoryNode" />
+              <item name="myblog-manager-web" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="webapp" type="462c0819:PsiDirectoryNode" />
+              <item name="WEB-INF" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="myblog-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="myblog-parent" type="462c0819:PsiDirectoryNode" />
+              <item name="myblog-manager-web" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="webapp" type="462c0819:PsiDirectoryNode" />
+              <item name="WEB-INF" type="462c0819:PsiDirectoryNode" />
+              <item name="jsp" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1545202181945" />
+    <property name="last_opened_file_path" value="$USER_HOME$/Desktop" />
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.3275862" />
+    <property name="settings.editor.selected.configurable" value="reference.settings.ide.settings.uml" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\huangshen\IdeaProjects\myblog-parent\myblog-sso-web\src\main\webapp" />
+      <recent name="C:\Users\huangshen\IdeaProjects\myblog-parent\myblog-sso-web\src\main\resources" />
+      <recent name="C:\Users\huangshen\IdeaProjects\myblog-parent\myblog-portal-web\src\main\webapp\WEB-INF\jsp\userspace" />
+      <recent name="C:\Users\huangshen\IdeaProjects\myblog-parent\myblog-portal-web\src\main\webapp\WEB-INF\jsp" />
+      <recent name="C:\Users\huangshen\IdeaProjects\myblog-parent\myblog-portal-web\src\main\webapp" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.myblog.common.utils" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\huangshen\IdeaProjects\myblog-parent\myblog-portal\myblog-portal-service\src\main\resources\spring" />
+      <recent name="C:\Users\huangshen\IdeaProjects\myblog-parent\myblog-so-web\src\main" />
+      <recent name="C:\Users\huangshen\IdeaProjects\myblog-parent\myblog-so-web\src\main\java" />
+      <recent name="C:\Users\huangshen\IdeaProjects\myblog-parent\myblog-so-web\src\main\resources" />
+      <recent name="C:\Users\huangshen\IdeaProjects\myblog-parent\myblog-sso-web\src\main\resources" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Maven.myblog-manager-web [clean,tomcat7:run]">
+    <configuration name="myblog-manager [clean,tomcat7:run]" type="MavenRunConfiguration" factoryName="Maven" nameIsGenerated="true">
+      <MavenSettings>
+        <option name="myGeneralSettings" />
+        <option name="myRunnerSettings" />
+        <option name="myRunnerParameters">
+          <MavenRunnerParameters>
+            <option name="profiles">
+              <set />
+            </option>
+            <option name="goals">
+              <list>
+                <option value="clean" />
+                <option value="tomcat7:run" />
+              </list>
+            </option>
+            <option name="pomFileName" />
+            <option name="profilesMap">
+              <map />
+            </option>
+            <option name="resolveToWorkspace" value="false" />
+            <option name="workingDirPath" value="$PROJECT_DIR$/myblog-manager" />
+          </MavenRunnerParameters>
+        </option>
+      </MavenSettings>
+      <method v="2" />
+    </configuration>
+    <configuration name="myblog-manager-web [clean,tomcat7:run]" type="MavenRunConfiguration" factoryName="Maven" nameIsGenerated="true">
+      <MavenSettings>
+        <option name="myGeneralSettings" />
+        <option name="myRunnerSettings" />
+        <option name="myRunnerParameters">
+          <MavenRunnerParameters>
+            <option name="profiles">
+              <set />
+            </option>
+            <option name="goals">
+              <list>
+                <option value="clean" />
+                <option value="tomcat7:run" />
+              </list>
+            </option>
+            <option name="pomFileName" />
+            <option name="profilesMap">
+              <map />
+            </option>
+            <option name="resolveToWorkspace" value="false" />
+            <option name="workingDirPath" value="$PROJECT_DIR$/myblog-manager-web" />
+          </MavenRunnerParameters>
+        </option>
+      </MavenSettings>
+      <method v="2" />
+    </configuration>
+    <configuration name="myblog-portal [clean,tomcat7:run]" type="MavenRunConfiguration" factoryName="Maven" nameIsGenerated="true">
+      <MavenSettings>
+        <option name="myGeneralSettings" />
+        <option name="myRunnerSettings" />
+        <option name="myRunnerParameters">
+          <MavenRunnerParameters>
+            <option name="profiles">
+              <set />
+            </option>
+            <option name="goals">
+              <list>
+                <option value="clean" />
+                <option value="tomcat7:run" />
+              </list>
+            </option>
+            <option name="pomFileName" />
+            <option name="profilesMap">
+              <map />
+            </option>
+            <option name="resolveToWorkspace" value="false" />
+            <option name="workingDirPath" value="$PROJECT_DIR$/myblog-portal" />
+          </MavenRunnerParameters>
+        </option>
+      </MavenSettings>
+      <method v="2" />
+    </configuration>
+    <configuration name="myblog-portal-web [clean,tomcat7:run]" type="MavenRunConfiguration" factoryName="Maven" nameIsGenerated="true">
+      <MavenSettings>
+        <option name="myGeneralSettings" />
+        <option name="myRunnerSettings" />
+        <option name="myRunnerParameters">
+          <MavenRunnerParameters>
+            <option name="profiles">
+              <set />
+            </option>
+            <option name="goals">
+              <list>
+                <option value="clean" />
+                <option value="tomcat7:run" />
+              </list>
+            </option>
+            <option name="pomFileName" />
+            <option name="profilesMap">
+              <map />
+            </option>
+            <option name="resolveToWorkspace" value="false" />
+            <option name="workingDirPath" value="$PROJECT_DIR$/myblog-portal-web" />
+          </MavenRunnerParameters>
+        </option>
+      </MavenSettings>
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Maven.myblog-manager-web [clean,tomcat7:run]" />
+      <item itemvalue="Maven.myblog-portal-web [clean,tomcat7:run]" />
+      <item itemvalue="Maven.myblog-portal [clean,tomcat7:run]" />
+      <item itemvalue="Maven.myblog-manager [clean,tomcat7:run]" />
+    </list>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="9a7322b9-b68c-404b-8f2e-b31efde86df2" name="Default Changelist" comment="" />
+      <created>1544447165850</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1544447165850</updated>
+      <workItem from="1544447168822" duration="3419000" />
+      <workItem from="1544455328210" duration="955000" />
+      <workItem from="1544508569660" duration="1857000" />
+      <workItem from="1544589688677" duration="624000" />
+      <workItem from="1544674319145" duration="15613000" />
+      <workItem from="1544705519107" duration="1401000" />
+      <workItem from="1544707871583" duration="7940000" />
+      <workItem from="1544768539646" duration="11300000" />
+      <workItem from="1544850692325" duration="18942000" />
+      <workItem from="1544935494086" duration="14587000" />
+      <workItem from="1544964907162" duration="8272000" />
+      <workItem from="1545020081970" duration="32340000" />
+      <workItem from="1545107461905" duration="17715000" />
+      <workItem from="1545131416218" duration="488000" />
+      <workItem from="1545131919158" duration="67000" />
+      <workItem from="1545131994013" duration="5871000" />
+      <workItem from="1545147315941" duration="524000" />
+      <workItem from="1545190718703" duration="7115000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="149030000" />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
+    <layout>
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.24798928" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Designer" order="2" />
+      <window_info id="Image Layers" order="3" />
+      <window_info id="Capture Tool" order="4" />
+      <window_info id="UI Designer" order="5" />
+      <window_info id="Favorites" order="6" side_tool="true" />
+      <window_info id="Web" order="7" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32956153" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.48090523" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Spring" order="7" />
+      <window_info anchor="bottom" id="Terminal" order="8" />
+      <window_info anchor="bottom" id="Docker" order="9" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" weight="0.32956153" />
+      <window_info anchor="bottom" id="Java Enterprise" order="11" />
+      <window_info anchor="bottom" id="Database Changes" order="12" />
+      <window_info anchor="bottom" id="Version Control" order="13" />
+      <window_info anchor="bottom" id="Messages" order="14" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="1" weight="0.25" />
+      <window_info anchor="right" id="Ant Build" order="2" weight="0.25" />
+      <window_info anchor="right" id="Maven" order="3" weight="0.19638069" />
+      <window_info anchor="right" id="Palette" order="4" />
+      <window_info anchor="right" id="Capture Analysis" order="5" />
+      <window_info anchor="right" id="Database" order="6" />
+      <window_info anchor="right" id="Palette&#9;" order="7" />
+      <window_info anchor="right" id="Theme Preview" order="8" />
+    </layout>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="antWorkspaceConfiguration">
+    <option name="IS_AUTOSCROLL_TO_SOURCE" value="false" />
+    <option name="FILTER_TARGETS" value="false" />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/myblog-sso/myblog-sso-service/pom.xml" />
+    <entry file="file://$PROJECT_DIR$/myblog-manager/myblog-manager-interface/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="342">
+          <caret line="18" column="19" selection-start-line="18" selection-start-column="19" selection-end-line="18" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-sso-web/myblog-sso-web.iml" />
+    <entry file="file://$PROJECT_DIR$/myblog-manager-web/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="437">
+          <caret line="23" column="51" selection-start-line="23" selection-start-column="51" selection-end-line="23" selection-end-column="51" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-sso-web/src/main/webapp/js/my.js" />
+    <entry file="file://$PROJECT_DIR$/myblog-sso-web/src/main/resources/conf/resource.properties" />
+    <entry file="file://$PROJECT_DIR$/myblog-sso-web/src/main/resources/spring/springmvc.xml" />
+    <entry file="file://$PROJECT_DIR$/myblog-sso-web/src/main/java/com/myblog/sso/controller/LoginController.java" />
+    <entry file="file://$PROJECT_DIR$/myblog-sso-web/pom.xml" />
+    <entry file="file://$PROJECT_DIR$/myblog-sso/pom.xml" />
+    <entry file="file://$PROJECT_DIR$/myblog-parent.iml">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-manager-web/src/main/resources/spring/springmvc.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="304">
+          <caret line="16" column="47" selection-start-line="16" selection-start-column="47" selection-end-line="16" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-sso/myblog-sso-service/src/main/resources/spring/applicationContext-service.xml" />
+    <entry file="file://$PROJECT_DIR$/myblog-so-web/src/main/resources/conf/resource.properties" />
+    <entry file="file://$PROJECT_DIR$/myblog-so-web/src/main/webapp/js/my.js" />
+    <entry file="file://$PROJECT_DIR$/myblog-so-web/src/main/java/com/myblog/sso/controller/TokenController.java" />
+    <entry file="file://$PROJECT_DIR$/myblog-so-web/src/main/resources/spring/springmvc.xml" />
+    <entry file="file://$PROJECT_DIR$/myblog-so-web/src/main/webapp/WEB-INF/web.xml" />
+    <entry file="file://$PROJECT_DIR$/myblog-so-web/src/main/java/com/myblog/sso/controller/RegitsterController.java" />
+    <entry file="file://$PROJECT_DIR$/myblog-so-web/pom.xml" />
+    <entry file="file://$PROJECT_DIR$/myblog-so-web/src/main/java/com/myblog/sso/controller/LoginController.java" />
+    <entry file="file://$PROJECT_DIR$/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="266">
+          <caret line="14" column="22" selection-start-line="14" selection-start-column="22" selection-end-line="14" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-common/src/main/java/com/myblog/common/jedis/JedisClient.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="133">
+          <caret line="7" column="27" lean-forward="true" selection-start-line="7" selection-start-column="27" selection-end-line="7" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-common/src/main/java/com/myblog/common/jedis/JedisClientPool.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="119">
+          <caret line="30" selection-start-line="30" selection-end-line="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="uml://JAVA/com.myblog.pojo.TbArticle">
+      <provider selected="true" editor-type-id="UmlEditorProvider">
+        <state>
+          <ID>JAVA</ID>
+          <OriginalElement>com.myblog.pojo.TbArticle</OriginalElement>
+          <nodes>
+            <node x="-73.16205998927347" y="-54.40498282760886">com.myblog.pojo.TbArticle</node>
+            <node x="-0.6702453987729768" y="-117.91411042944785">java.io.Serializable</node>
+          </nodes>
+          <notes />
+          <edges>
+            <edge source="com.myblog.pojo.TbArticle" target="java.io.Serializable">
+              <point x="0.0" y="-430.0" />
+              <point x="0.0" y="15.5" />
+            </edge>
+          </edges>
+          <settings layout="Hierarchic Group" zoom="0.6784599375650364" x="-350.0" y="224.0" />
+          <SelectedNodes />
+          <Categories>
+            <Category>Fields</Category>
+            <Category>Constructors</Category>
+            <Category>Methods</Category>
+          </Categories>
+          <SCOPE>All</SCOPE>
+          <VISIBILITY>private</VISIBILITY>
+        </state>
+      </provider>
+    </entry>
+    <entry file="uml://JAVA/com.myblog.pojo.TbUser">
+      <provider selected="true" editor-type-id="UmlEditorProvider">
+        <state>
+          <ID>JAVA</ID>
+          <OriginalElement>com.myblog.pojo.TbUser</OriginalElement>
+          <nodes>
+            <node x="0.0" y="0.0">com.myblog.pojo.TbUser</node>
+          </nodes>
+          <notes />
+          <edges />
+          <settings layout="Hierarchic Group" zoom="1.0" x="-219.0" y="172.0" />
+          <SelectedNodes />
+          <Categories>
+            <Category>Fields</Category>
+            <Category>Constructors</Category>
+            <Category>Methods</Category>
+          </Categories>
+          <SCOPE>All</SCOPE>
+          <VISIBILITY>private</VISIBILITY>
+        </state>
+      </provider>
+    </entry>
+    <entry file="uml://JAVA/com.myblog.pojo.TbUserlog">
+      <provider selected="true" editor-type-id="UmlEditorProvider">
+        <state>
+          <ID>JAVA</ID>
+          <OriginalElement>com.myblog.pojo.TbUserlog</OriginalElement>
+          <nodes>
+            <node x="" y="">com.myblog.pojo.TbUserlog</node>
+          </nodes>
+          <notes />
+          <edges />
+          <settings layout="Hierarchic Group" zoom="1.0" x="101.0" y="189.0" />
+          <SelectedNodes />
+          <Categories>
+            <Category>Fields</Category>
+            <Category>Constructors</Category>
+            <Category>Methods</Category>
+          </Categories>
+          <SCOPE>All</SCOPE>
+          <VISIBILITY>private</VISIBILITY>
+        </state>
+      </provider>
+    </entry>
+    <entry file="uml://JAVA/com.myblog.mapper.TbArticleMapper">
+      <provider selected="true" editor-type-id="UmlEditorProvider">
+        <state>
+          <ID>JAVA</ID>
+          <OriginalElement>com.myblog.mapper.TbArticleMapper</OriginalElement>
+          <nodes>
+            <node x="" y="">com.myblog.mapper.TbArticleMapper</node>
+          </nodes>
+          <notes />
+          <edges />
+          <settings layout="Hierarchic Group" zoom="1.0" x="216.0" y="223.0" />
+          <SelectedNodes />
+          <Categories>
+            <Category>Fields</Category>
+            <Category>Constructors</Category>
+            <Category>Methods</Category>
+          </Categories>
+          <SCOPE>All</SCOPE>
+          <VISIBILITY>private</VISIBILITY>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-portal-web/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2147">
+          <caret line="113" column="18" selection-start-line="113" selection-start-column="18" selection-end-line="113" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-portal-web/src/main/java/com/myblog/portal/controller/PortalArticleController.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="95">
+          <caret line="15" column="13" selection-start-line="15" selection-start-column="13" selection-end-line="15" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-portal-web/src/main/resources/spring/springmvc.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="513">
+          <caret line="27" selection-start-line="27" selection-end-line="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-portal/myblog-portal-service/pom.xml">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-portal/pom.xml">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-manager/myblog-manager-pojo/src/main/java/com/myblog/pojo/TbUser.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="152">
+          <caret line="8" selection-start-line="8" selection-end-line="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-manager/myblog-manager-pojo/src/main/java/com/myblog/pojo/TbUserlog.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="171">
+          <caret line="9" column="27" selection-start-line="9" selection-start-column="27" selection-end-line="9" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-portal-web/src/main/webapp/WEB-INF/web.xml">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-portal/myblog-portal-service/src/main/resources/conf/resource.properties">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="25" selection-start-column="25" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-portal/myblog-portal-service/src/main/resources/spring/applicationContext-redis.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="17" column="11" selection-start-line="17" selection-start-column="11" selection-end-line="17" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-portal/myblog-portal-service/src/main/java/com/myblog/portal/service/impl/ArticlePageServiceImpl.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="502">
+          <caret line="48" column="5" lean-forward="true" selection-start-line="48" selection-start-column="5" selection-end-line="48" selection-end-column="5" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-portal-web/src/main/webapp/WEB-INF/jsp/blog.jsp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="361">
+          <caret line="55" column="18" lean-forward="true" selection-start-line="55" selection-start-column="18" selection-end-line="55" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-portal-web/src/main/webapp/WEB-INF/jsp/fragments/footer.jsp">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-portal-web/src/main/webapp/WEB-INF/jsp/fragments/header.jsp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="507">
+          <caret line="71" column="17" lean-forward="true" selection-start-line="71" selection-start-column="17" selection-end-line="71" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-portal-web/src/main/webapp/WEB-INF/jsp/index.jsp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="488">
+          <caret line="84" column="33" lean-forward="true" selection-start-line="84" selection-start-column="33" selection-end-line="84" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-manager/myblog-manager-service/src/main/java/com/myblog/service/impl/ArticleServiceImpl.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="84">
+          <caret line="47" column="21" lean-forward="true" selection-start-line="47" selection-start-column="21" selection-end-line="47" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-manager/myblog-manager-dao/src/main/java/com/myblog/mapper/TbArticleMapper.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="342">
+          <caret line="21" lean-forward="true" selection-start-line="21" selection-end-line="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-portal/myblog-portal-interface/src/main/java/com/myblog/portal/pojo/ArticleResult.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="551">
+          <caret line="50" column="5" lean-forward="true" selection-start-line="50" selection-start-column="5" selection-end-line="50" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-manager-web/src/main/webapp/WEB-INF/jsp/index.jsp">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-manager-web/src/main/webapp/WEB-INF/jsp/article_admin.jsp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="169">
+          <caret line="114" column="63" lean-forward="true" selection-start-line="114" selection-start-column="63" selection-end-line="114" selection-end-column="63" />
+          <folding>
+            <element signature="n#style#0;n#ul#1;n#div#1;n#div#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-common/src/main/java/com/myblog/common/utils/Result.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="342">
+          <caret line="22" lean-forward="true" selection-start-line="22" selection-end-line="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-manager-web/src/main/webapp/js/editor.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="331">
+          <caret line="111" column="43" lean-forward="true" selection-start-line="111" selection-start-column="43" selection-end-line="111" selection-end-column="43" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/myblog-manager-web/src/main/java/com/myblog/controller/ArticleController.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="331">
+          <caret line="92" column="9" lean-forward="true" selection-start-line="92" selection-start-column="9" selection-end-line="92" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+  </component>
+  <component name="masterDetails">
+    <states>
+      <state key="ArtifactsStructureConfigurable.UI">
+        <settings>
+          <artifact-editor />
+          <last-edited>myblog-manager-service:war</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+                <option value="0.5" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="FacetStructureConfigurable.UI">
+        <settings>
+          <last-edited>Spring</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="GlobalLibrariesConfigurable.UI">
+        <settings>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="JdkListConfigurable.UI">
+        <settings>
+          <last-edited>1.8</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ModuleStructureConfigurable.UI">
+        <settings>
+          <last-edited>Web|myblog-sso-web</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.3275862" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ProjectLibrariesConfigurable.UI">
+        <settings>
+          <last-edited>Maven: aopalliance:aopalliance:1.0</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+    </states>
+  </component>
+</project>

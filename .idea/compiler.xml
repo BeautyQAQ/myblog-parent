@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="myblog-common" />
+        <module name="myblog-manager-dao" />
+        <module name="myblog-manager-interface" />
+        <module name="myblog-manager-pojo" />
+        <module name="myblog-manager-service" />
+        <module name="myblog-manager-web" />
+        <module name="myblog-portal-interface" />
+        <module name="myblog-portal-service" />
+        <module name="myblog-portal-web" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="myblog-so-web" target="1.8" />
+      <module name="myblog-sso" target="1.8" />
+      <module name="myblog-sso-interface" target="1.8" />
+      <module name="myblog-sso-service" target="1.8" />
+      <module name="myblog-sso-web" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
