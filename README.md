@@ -16,7 +16,7 @@
 
 **SOA：Service Oriented Architecture ：** 面向服务的架构。也就是把工程拆分成服务层、表现层两个工程。服务层中包含业务逻辑，只需要对外提供服务即可。表现层只需要处理和页面的交互，业务逻辑都是调用服务层的服务来实现。
 
-**使用技术 : ** Spring、SpringMVC、MyBatis、JSP、Ajax、JSON、MySQL数据库、redis缓存、negix服务器、dubbo发布服务
+**使用技术 :** Spring、SpringMVC、MyBatis、JSP、Ajax、JSON、MySQL数据库、redis缓存、negix服务器、dubbo发布服务
 
 **项目内容 ：** 后台文章管理模块、前台文章显示模块
 
