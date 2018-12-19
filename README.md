@@ -14,10 +14,10 @@
 
 ## 什么是 SOA架构
 
-**SOA：Service Oriented Architecture ：**面向服务的架构。也就是把工程拆分成服务层、表现层两个工程。服务层中包含业务逻辑，只需要对外提供服务即可。表现层只需要处理和页面的交互，业务逻辑都是调用服务层的服务来实现。
+**SOA：Service Oriented Architecture ：** 面向服务的架构。也就是把工程拆分成服务层、表现层两个工程。服务层中包含业务逻辑，只需要对外提供服务即可。表现层只需要处理和页面的交互，业务逻辑都是调用服务层的服务来实现。
 
-**使用技术 :** Spring、SpringMVC、MyBatis、JSP、Ajax、JSON、MySQL数据库、redis缓存、negix服务器、dubbo发布服务
+**使用技术 : ** Spring、SpringMVC、MyBatis、JSP、Ajax、JSON、MySQL数据库、redis缓存、negix服务器、dubbo发布服务
 
-**项目内容 ：**后台文章管理模块、前台文章显示模块
+**项目内容 ：** 后台文章管理模块、前台文章显示模块
 
-**详细信息 ：**给项目是一个分布式的SOA架构，后台用Spring+MyBatis实现，模块之间的通信用的dubbo，静态资源由nginx服务器访问，redis做缓存服务，将前台界面放入缓存。后续会增加ActiveMQ做消息队列，并且目前还没有登录功能，后续要增加SSO单点登录系统。
+**详细信息 ：** 给项目是一个分布式的SOA架构，后台用Spring+MyBatis实现，模块之间的通信用的dubbo，静态资源由nginx服务器访问，redis做缓存服务，将前台界面放入缓存。后续会增加ActiveMQ做消息队列，并且目前还没有登录功能，后续要增加SSO单点登录系统。
