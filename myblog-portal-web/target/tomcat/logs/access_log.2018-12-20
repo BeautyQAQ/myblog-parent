@@ -33,3 +33,6 @@
 0:0:0:0:0:0:0:1 - - [20/Dec/2018:00:24:22 +0800] "GET //fonts/fontawesome-webfont.woff2?v=4.3.0 HTTP/1.1" 200 77160 http-bio-8082-exec-7 3
 0:0:0:0:0:0:0:1 - - [20/Dec/2018:00:24:22 +0800] "GET //fonts/fontawesome-webfont.woff2?v=4.7.0 HTTP/1.1" 200 77160 http-bio-8082-exec-7 2
 0:0:0:0:0:0:0:1 - - [20/Dec/2018:00:24:23 +0800] "GET /favicon.ico HTTP/1.1" 404 949 http-bio-8082-exec-6 3
+0:0:0:0:0:0:0:1 - - [20/Dec/2018:00:50:49 +0800] "GET / HTTP/1.1" 200 23117 http-bio-8082-exec-2 122
+0:0:0:0:0:0:0:1 - - [20/Dec/2018:00:50:53 +0800] "GET /blogs/?articleId=10038 HTTP/1.1" 200 8165 http-bio-8082-exec-2 347
+0:0:0:0:0:0:0:1 - - [20/Dec/2018:00:50:53 +0800] "GET //resources/images/avatar-defualt.jpg HTTP/1.1" 200 17489 http-bio-8082-exec-2 11
