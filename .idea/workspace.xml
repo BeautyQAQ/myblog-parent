@@ -29,11 +29,20 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/myblog-manager-web/src/main/java/com/myblog/controller/ArticleController.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="254">
-              <caret line="88" column="17" lean-forward="true" selection-start-line="88" selection-start-column="17" selection-end-line="88" selection-end-column="17" />
+            <state relative-caret-position="235">
+              <caret line="87" column="38" selection-start-line="87" selection-start-column="38" selection-end-line="87" selection-end-column="38" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/pom.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="301">
+              <caret line="30" column="58" selection-start-line="30" selection-start-column="58" selection-end-line="30" selection-end-column="58" />
             </state>
           </provider>
         </entry>
@@ -101,8 +110,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>.bd</find>
-      <find>body</find>
       <find>uploadFile</find>
       <find>emp_update_btn</find>
       <find>edit_btn</find>
@@ -131,6 +138,8 @@
       <find>ArticleResult</find>
       <find>update</find>
       <find>add</find>
+      <find>&lt;groupId&gt;com.fasterxml.jackson.core&lt;/groupId&gt;</find>
+      <find>httpclient</find>
     </findStrings>
     <replaceStrings>
       <replace>picture</replace>
@@ -187,7 +196,6 @@
         <option value="$PROJECT_DIR$/myblog-sso/myblog-sso-service/src/main/resources/spring/applicationContext-trans.xml" />
         <option value="$PROJECT_DIR$/myblog-sso-web/pom.xml" />
         <option value="$PROJECT_DIR$/myblog-so-web/pom.xml" />
-        <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/myblog-portal-web/src/main/webapp/WEB-INF/jsp/fragments/header.jsp" />
         <option value="$PROJECT_DIR$/myblog-portal/myblog-portal-service/src/main/resources/spring/applicationContext-redis.xml" />
         <option value="$PROJECT_DIR$/myblog-portal/myblog-portal-service/src/main/resources/conf/resource.properties" />
@@ -195,6 +203,7 @@
         <option value="$PROJECT_DIR$/myblog-manager-web/src/main/webapp/WEB-INF/jsp/article_admin.jsp" />
         <option value="$PROJECT_DIR$/myblog-manager-web/src/main/webapp/js/editor.js" />
         <option value="$PROJECT_DIR$/myblog-manager-web/src/main/java/com/myblog/controller/ArticleController.java" />
+        <option value="$PROJECT_DIR$/pom.xml" />
       </list>
     </option>
   </component>
@@ -554,16 +563,15 @@
       <workItem from="1545131994013" duration="5871000" />
       <workItem from="1545147315941" duration="524000" />
       <workItem from="1545190718703" duration="7115000" />
-      <workItem from="1545206056490" duration="3589000" />
+      <workItem from="1545206056490" duration="3905000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="152619000" />
+    <option name="totallyTimeSpent" value="152935000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25134048" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -581,7 +589,7 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Spring" order="7" />
-      <window_info anchor="bottom" id="Terminal" order="8" weight="0.33002833" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="8" visible="true" weight="0.33002833" />
       <window_info anchor="bottom" id="Docker" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" weight="0.32956153" />
       <window_info anchor="bottom" id="Java Enterprise" order="11" />
@@ -648,13 +656,6 @@
     <entry file="file://$PROJECT_DIR$/myblog-so-web/src/main/java/com/myblog/sso/controller/RegitsterController.java" />
     <entry file="file://$PROJECT_DIR$/myblog-so-web/pom.xml" />
     <entry file="file://$PROJECT_DIR$/myblog-so-web/src/main/java/com/myblog/sso/controller/LoginController.java" />
-    <entry file="file://$PROJECT_DIR$/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="266">
-          <caret line="14" column="22" selection-start-line="14" selection-start-column="22" selection-end-line="14" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/myblog-common/src/main/java/com/myblog/common/jedis/JedisClient.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="133">
@@ -864,8 +865,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/myblog-manager-web/src/main/java/com/myblog/controller/ArticleController.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="254">
-          <caret line="88" column="17" lean-forward="true" selection-start-line="88" selection-start-column="17" selection-end-line="88" selection-end-column="17" />
+        <state relative-caret-position="235">
+          <caret line="87" column="38" selection-start-line="87" selection-start-column="38" selection-end-line="87" selection-end-column="38" />
         </state>
       </provider>
     </entry>
@@ -904,6 +905,13 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2166">
           <caret line="114" column="63" selection-start-line="114" selection-start-column="63" selection-end-line="114" selection-end-column="63" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="301">
+          <caret line="30" column="58" selection-start-line="30" selection-start-column="58" selection-end-line="30" selection-end-column="58" />
         </state>
       </provider>
     </entry>
