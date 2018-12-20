@@ -28,9 +28,35 @@
 
 **2.导入项目：** 项目下载后，将父工程导入进IntelliJ IDEA Ultimate，我的IDEA版本是2018.3。
 
-**3.项目启动：** 项目导入后，配置maven启动项，此项目是用tomcat插件方式启动。
+**3.项目启动：** 项目导入后，配置maven启动项，此项目是用tomcat插件方式启动。方法如下图：
 
-**4.运行：** localhost:8082是后台管理界面，localhost:8084是前台界面。
+![](http://ww1.sinaimg.cn/large/85b66755gy1fyd57fv14qj21an0q90xc.jpg)
+*1.点击`+`,选择maven*
+*2.点击2号标记的文件夹，选择要配置的项目，此项目中要配置4个项目启动项，分别是：*
+    **1.myblog-portal-web**
+    **2.myblog-portal**
+    **3.myblog-manager-web**
+    **4.myblog-manager**
+*当然，是一个一个项目模块单独配置*
+*3.在3号输入框中输入`clean tomcat7:run`*
+*4.然后就可以启动了，注意要先启动后台模块，再启动前台web模块哦！！！*
+
+> 1.项目想要成功启动，需要安装zookeeper注册中心(因为此项目用到了dubbo服务治理框架，需要zookeeper)，我用的是zookeeper 3.4.10 Linux版(Ubuntu 16.4)，下载安装好zookeeper之后，进入zookeeper/bin文件夹下 输入如下命令：
+
+```
+@DESKTOP-2BGCAV8:/zookeeper-3.4.10/bin$ ./zkServer.sh start
+```
+> 提示Starting zookeeper ... STARTED 就启动完成啦
+> 2.要想访问项目的静态资源(图片等)，还需要启动nginx(因为此项目是由nginx作为静态资源服务器，访问图片需要nginx，我用的是windows下的nginx-1.14.1版本，之所以不用linux版是windows向Linux传文件的时候，需要其他的工具，例如FTP服务等等),下载好nginx后还需要配置nginx-1.14.1\conf\nginx.conf文件，在server配置中添加一个location配置：
+```
+    location /images{
+        root  D:\img; #需要在创建D:\img\images目录作为图片上传文件夹
+                      #访问图片的url为：http://127.0.0.1:80/images/xxxxx.jpg
+    }
+```
+>配置完成后启动nginx
+
+**4.运行：** 4个项目模块启动成功后，`localhost:8082`是后台管理界面，`localhost:8084`是前台界面。
 
 ### 运行效果
 
