@@ -47,6 +47,7 @@
 @DESKTOP-2BGCAV8:/zookeeper-3.4.10/bin$ ./zkServer.sh start
 ```
 > 提示Starting zookeeper ... STARTED 就启动完成啦
+****
 > 2.要想访问项目的静态资源(图片等)，还需要启动nginx(因为此项目是由nginx作为静态资源服务器，访问图片需要nginx，我用的是windows下的nginx-1.14.1版本，之所以不用linux版是windows向Linux传文件的时候，需要其他的工具，例如FTP服务等等),下载好nginx后还需要配置nginx-1.14.1\conf\nginx.conf文件，在server配置中添加一个location配置：
 ```
     location /images{
