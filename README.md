@@ -32,13 +32,13 @@
 
 ![](http://ww1.sinaimg.cn/large/85b66755gy1fyd57fv14qj21an0q90xc.jpg)
 *1.点击`+`,选择maven*
-*2.点击2号标记的文件夹，选择要配置的项目，此项目中要配置4个项目启动项，分别是：*
-    **1.myblog-portal-web**
-    **2.myblog-portal**
-    **3.myblog-manager-web**
-    **4.myblog-manager**
-*当然，是一个一个项目模块单独配置*
-*3.在3号输入框中输入`clean tomcat7:run`*
+*2.点击2号标记的文件夹，选择要配置的项目，此项目中要配置4个项目启动项，分别是：*  
+**1.myblog-portal-web**  
+**2.myblog-portal**  
+**3.myblog-manager-web**  
+**4.myblog-manager**  
+*注意，是一个一个项目模块单独配置*  
+*3.在3号输入框中输入`clean tomcat7:run`*  
 *4.然后就可以启动了，注意要先启动后台模块，再启动前台web模块哦！！！*
 
 > 1.项目想要成功启动，需要安装zookeeper注册中心(因为此项目用到了dubbo服务治理框架，需要zookeeper)，我用的是zookeeper 3.4.10 Linux版(Ubuntu 16.4)，下载安装好zookeeper之后，进入zookeeper/bin文件夹下 输入如下命令：
