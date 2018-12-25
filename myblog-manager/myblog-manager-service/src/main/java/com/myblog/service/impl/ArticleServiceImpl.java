@@ -2,24 +2,31 @@ package com.myblog.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.myblog.common.utils.DateTimeUtil;
 import com.myblog.common.utils.Result;
 import com.myblog.mapper.TbArticleMapper;
 import com.myblog.pojo.TbArticle;
 import com.myblog.pojo.TbArticleExample;
 import com.myblog.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.core.MessageCreator;
 import org.springframework.stereotype.Service;
 
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.Session;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Service
 public class ArticleServiceImpl implements ArticleService {
     @Autowired
     private TbArticleMapper tbArticleMapper;
-
+    @Autowired
+    private JmsTemplate jmsTemplate;
+    @Autowired
+    private Destination queueDestination;
 
     @Override
     public Result getArticleListPage(int pageNum, int pageSize, String orderBy) {
@@ -47,6 +54,14 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public void deleteArticle(int articleId) {
         tbArticleMapper.deleteByPrimaryKey(articleId);
+        //发消息更新缓存,清空缓存
+        jmsTemplate.send(queueDestination, new MessageCreator() {
+            @Override
+            public Message createMessage(Session session) throws JMSException {
+                System.out.println("已经发送消息");
+                return session.createTextMessage("delete_cache");
+            }
+        });
     }
 
     /**
@@ -59,6 +74,14 @@ public class ArticleServiceImpl implements ArticleService {
         TbArticleExample.Criteria criteria = example.createCriteria();
         criteria.andArticleIdIn(articleIds);
         tbArticleMapper.deleteByExample(example);
+        //发消息更新缓存,清空缓存
+        jmsTemplate.send(queueDestination, new MessageCreator() {
+            @Override
+            public Message createMessage(Session session) throws JMSException {
+                System.out.println("已经发送消息");
+                return session.createTextMessage("delete_cache");
+            }
+        });
     }
 
     /**
@@ -68,6 +91,14 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public void addArticle(TbArticle tbArticle) {
         tbArticleMapper.insertSelective(tbArticle);
+        //发消息更新缓存,清空缓存
+        jmsTemplate.send(queueDestination, new MessageCreator() {
+            @Override
+            public Message createMessage(Session session) throws JMSException {
+                System.out.println("已经发送消息");
+                return session.createTextMessage("delete_cache");
+            }
+        });
     }
 
     /**
@@ -87,5 +118,13 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public void updateArticle(TbArticle tbArticle) {
         tbArticleMapper.updateByPrimaryKeySelective(tbArticle);
+        //发消息更新缓存,清空缓存
+        jmsTemplate.send(queueDestination, new MessageCreator() {
+            @Override
+            public Message createMessage(Session session) throws JMSException {
+                System.out.println("已经发送消息");
+                return session.createTextMessage("delete_cache");
+            }
+        });
     }
 }
