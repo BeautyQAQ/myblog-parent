@@ -57,7 +57,27 @@
 ```
 >配置完成后启动nginx
 
-**4.运行：** 4个项目模块启动成功后，`localhost:8082`是后台管理界面，`localhost:8084`是前台界面。
+****
+> 3.项目已经加入redis缓存，需要启动redis，(当然，不启动也没关系，只是没有缓存而已，数据库还是能用的，增加缓存的意义是为了提高系统的性能，应对更大的并发)。这里我只提供Ubuntu下的安装方法：  
+1)先更新APT缓存，然后安装redis,输入如下命令
+```
+sudo apt-get update
+sudo apt-get install redis-server
+
+```
+> 2)以配置文件启动方式启动redis(默认是后台启动)
+```
+sudo redis-server /etc/redis/redis.conf #这个是redis.conf的路径，根据你实际路径输入
+```
+> 没有提示就表示启动成功了！！！
+****
+> 4.项目已经加入ActiveMQ消息队列，所以还要启动项目已经加入ActiveMQ消息队列，我这边使用的是apache-activemq-5.12.0 Linux版，下载解压好activemq后，进入activemq/bin文件夹下 输入如下命令：
+```
+@DESKTOP-2BGCAV8:/apache-activemq-5.12.0/bin$ ./activemq start
+```
+> 输出INFO提示信息就启动成功了，可以测试一下，打开浏览器，输入`http://localhost:8161`,可以进入Apache ActiveMQ!欢迎页面。
+
+**4.运行：** 以上配置部署完成和4个项目模块启动成功后，就可以看看项目情况了，打开浏览器输入`localhost:8082`是后台管理界面，输入`localhost:8084`是前台界面。
 
 ### 运行效果
 
