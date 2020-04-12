@@ -1,8 +1,9 @@
 package com.myblog.pojo;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class TbUserlog {
+public class TbUserlog implements Serializable {
     private Integer id;
 
     private Integer userId;

@@ -58,7 +58,7 @@
                 aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <a class="navbar-brand" href="/">NewStarBlog</a>
+        <a class="navbar-brand" href="http://localhost:8082">NewStarBlog</a>
 
         <div class="collapse navbar-collapse" id="navbarsContainer">
 
@@ -84,16 +84,16 @@
                     <%--&lt;%&ndash;<a href="/u/zhang/blogs/edit" class="btn btn-outline-success my-2 my-sm-0">写博客</a>&ndash;%&gt;--%>
                 <%--&lt;%&ndash;</div>&ndash;%&gt;--%>
 
-                <form action="/logout" method="post">
-                    <input class="btn btn-outline-success " type="submit" value="退出">
-                </form>
-            </div>
+                <%--<form action="/logout" method="post">--%>
+                    <%--<input class="btn btn-outline-success " type="submit" value="退出">--%>
+                <%--</form>--%>
+            <%--</div>--%>
 
 
-            <div authorize="isAnonymous()">
-                <a href="http://localhost:8086/page/login" class="btn btn-outline-success my-2 my-sm-0" type="submit">登录</a>
-                <a href="http://localhost:8086/page/register" class="btn btn-outline-success my-2 my-sm-0" type="submit">注册</a>
-            </div>
+            <%--<div authorize="isAnonymous()">--%>
+                <%--<a href="http://localhost:8086/page/login" class="btn btn-outline-success my-2 my-sm-0" type="submit">登录</a>--%>
+                <%--<a href="http://localhost:8086/page/register" class="btn btn-outline-success my-2 my-sm-0" type="submit">注册</a>--%>
+            <%--</div>--%>
 
         </div>
 

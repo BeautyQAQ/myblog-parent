@@ -10,6 +10,8 @@
         <module>myblog-manager</module>
         <module>myblog-portal-web</module>
         <module>myblog-manager-web</module>
+        <module>myblog-SingleSignOn</module>
+        <module>myblog-SingleSignOn-web</module>
     </modules>
     <packaging>pom</packaging>
     <!-- 集中定义依赖版本号 -->
