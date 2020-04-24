@@ -83,14 +83,14 @@ sudo redis-server /etc/redis/redis.conf #这个是redis.conf的路径，根据�
 
 **前台界面，文章列表**
 
-![cmd-markdown-logo](http://wx4.sinaimg.cn/large/85b66755gy1fycj727h2rj21gr0rjwi5.jpg)
+![cmd-markdown-logo](https://s1.ax1x.com/2020/04/24/JB4k5D.jpg)
 
 **文章详情**
 
-![cmd-markdown-logo](http://wx4.sinaimg.cn/large/85b66755gy1fycj727h2rj21gr0rjwi5.jpg)
+![cmd-markdown-logo](https://s1.ax1x.com/2020/04/24/JB4V8H.jpg)
 
 **后台界面**
 
-![cmd-markdown-logo](http://wx2.sinaimg.cn/large/85b66755gy1fycj8ayl78j21gs0p2q7s.jpg)
+![cmd-markdown-logo](https://s1.ax1x.com/2020/04/24/JB4EPe.jpg)
 
-![cmd-markdown-logo](http://wx3.sinaimg.cn/large/85b66755gy1fycj8g17fbj21gv0ozdhr.jpg)
+![cmd-markdown-logo](https://s1.ax1x.com/2020/04/24/JB4FUO.jpg)
