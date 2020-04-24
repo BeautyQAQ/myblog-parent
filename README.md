@@ -30,7 +30,7 @@
 
 **3.项目启动：** 项目导入后，配置maven启动项，此项目是用tomcat插件方式启动。方法如下图：
 
-![](http://ww1.sinaimg.cn/large/85b66755gy1fyd57fv14qj21an0q90xc.jpg)
+![](https://s1.ax1x.com/2020/04/24/JBI6D1.jpg)
 *1.点击`+`,选择maven*  
 *2.点击2号标记的文件夹，选择要配置的项目，此项目中要配置4个项目启动项，分别是：*  
 **1.myblog-portal-web**  
