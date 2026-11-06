@@ -15,6 +15,7 @@ $(function () {
             url: form.attr("action"),
             type: "POST",
             data: form.serialize(),
+            headers: {"X-CSRF-Token": $("meta[name=\"_csrf\"]").attr("content")},
             dataType: "json"
         }).done(function (data) {
             if (data.status === 200) {
@@ -22,8 +23,8 @@ $(function () {
             } else {
                 errorText.text(data.msg || form.attr("data-error-message"));
             }
-        }).fail(function () {
-            errorText.text("请求失败，请稍后重试");
+        }).fail(function (response) {
+            errorText.text(response.responseJSON && response.responseJSON.msg || "请求失败，请稍后重试");
         }).always(function () {
             button.prop("disabled", false);
         });

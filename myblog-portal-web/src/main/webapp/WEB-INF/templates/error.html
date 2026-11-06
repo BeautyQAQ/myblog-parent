@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${errorTitle})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navigation}"></nav>
+<main class="container blog-content-container">
+    <div class="card card-block">
+        <h1 th:text="${errorTitle}">页面暂时无法打开</h1>
+        <p th:text="${errorMessage}">请返回首页继续浏览。</p>
+        <a class="btn btn-primary" th:href="@{/}">返回首页</a>
+    </div>
+</main>
+<th:block th:replace="~{fragments/layout :: footer}"></th:block>
+</body>
+</html>

@@ -36,8 +36,8 @@ public class ArticlePageServiceImpl implements ArticlePageService {
 
     @Override
     public ArticleResult getPortalArticleListPage(int pageNum, int pageSize, String orderBy) {
-        if (pageNum < 1 || pageSize < 1) {
-            throw new IllegalArgumentException("pageNum and pageSize must be positive");
+        if (pageNum < 1 || pageSize < 1 || pageSize > 100) {
+            throw new IllegalArgumentException("pageNum must be positive and pageSize must be between 1 and 100");
         }
         if (!"heat".equals(orderBy) && !"new".equals(orderBy)) {
             throw new IllegalArgumentException("orderBy must be heat or new");
@@ -46,7 +46,7 @@ public class ArticlePageServiceImpl implements ArticlePageService {
         String cacheKey = null;
         try {
             String version = jedisClient.get(cachePrefix + ":version");
-            cacheKey = cachePrefix + ":v" + (version == null ? "0" : version)
+            cacheKey = cachePrefix + ":published:v" + (version == null ? "0" : version)
                     + ':' + orderBy + ':' + pageNum + ':' + pageSize;
             String json = jedisClient.get(cacheKey);
             if (json != null && !json.isBlank()) {
@@ -93,6 +93,9 @@ public class ArticlePageServiceImpl implements ArticlePageService {
 
     @Override
     public TbArticle getArticleWithText(int articleId) {
-        return articleMapper.selectByPrimaryKey(articleId);
+        if (articleId < 1) {
+            throw new IllegalArgumentException("articleId must be positive");
+        }
+        return articleMapper.selectPublishedByPrimaryKey(articleId);
     }
 }

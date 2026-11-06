@@ -10,7 +10,7 @@
         <div class="form-group col-md-5">
             <label for="username" class="col-form-label">用户名</label>
             <input type="text" class="form-control" id="username" name="username" maxlength="50"
-                   autocomplete="username" placeholder="请输入账号，至少3个字符，至多20个" required>
+                   autocomplete="username" placeholder="请输入账号，至少3个字符，至多50个" required>
         </div>
         <div class="form-group col-md-5">
             <label for="email" class="col-form-label">邮箱</label>
@@ -24,8 +24,8 @@
         </div>
         <div class="form-group col-md-5">
             <label for="password" class="col-form-label">密码</label>
-            <input type="password" class="form-control" id="password" name="password" maxlength="30"
-                   autocomplete="new-password" placeholder="请输入密码，字母或特殊符号和数字结合" required>
+            <input type="password" class="form-control" id="password" name="password" minlength="8" maxlength="128"
+                   autocomplete="new-password" placeholder="请输入8至128位密码" required>
         </div>
         <div class="form-group col-md-5">
             <a th:href="@{/page/login}">已有账号，去登录</a>

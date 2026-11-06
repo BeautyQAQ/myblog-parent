@@ -1,6 +1,11 @@
 package com.myblog.sso.controller;
 
 import com.myblog.common.utils.JsonUtils;
+import com.myblog.common.security.SessionSecurity;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import com.myblog.common.utils.Result;
 import com.myblog.sso.service.TokenService;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +26,26 @@ public class TokenController {
 
     @Autowired
     private TokenService tokenService;
+
+    @PostMapping("/user/logout")
+    @ResponseBody
+    public Result logout(HttpServletRequest request, HttpServletResponse response) {
+        String token = SessionSecurity.readToken(request);
+        String submitted = request.getHeader("X-CSRF-Token");
+        if (submitted == null) {
+            submitted = request.getParameter("_csrf");
+        }
+        if (!SessionSecurity.validCsrf(token, submitted)) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            return Result.build(403, "请求校验失败，请刷新页面后重试");
+        }
+        Result result = tokenService.logout(token);
+        SessionSecurity.clearTokenCookie(request, response);
+        if (request.getSession(false) != null) {
+            request.getSession(false).invalidate();
+        }
+        return result;
+    }
 
     @RequestMapping(value="/user/token/{token}")
     public ResponseEntity<?> getUserByToken(@PathVariable String token,

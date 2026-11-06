@@ -2,6 +2,10 @@ package com.myblog.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.myblog.common.utils.Result;
+import com.myblog.common.security.SessionSecurity;
+import com.myblog.pojo.TbUser;
+import com.myblog.sso.service.TokenService;
+import jakarta.servlet.http.Cookie;
 import com.myblog.service.ArticleService;
 import com.myblog.service.ImageService;
 import org.junit.jupiter.api.Test;
@@ -44,7 +48,7 @@ class MvcConfigurationTest {
             assertInstanceOf(StandardServletMultipartResolver.class, context.getBean("multipartResolver"));
             assertInstanceOf(ThymeleafViewResolver.class, context.getBean("viewResolver"));
             MockMvc mockMvc = webAppContextSetup(context).build();
-            MockHttpServletResponse response = mockMvc.perform(get("/article/list")).andReturn().getResponse();
+            MockHttpServletResponse response = mockMvc.perform(get("/article/list").cookie(adminCookie())).andReturn().getResponse();
 
             assertEquals(200, response.getStatus());
             assertEquals(200, new ObjectMapper().readTree(response.getContentAsString()).path("status").asInt());
@@ -55,7 +59,7 @@ class MvcConfigurationTest {
     void rendersTheManagementShellWithContextRelativeResourcesAndInitialIframe() throws Exception {
         try (GenericWebApplicationContext context = mvcContext()) {
             MockHttpServletResponse response = webAppContextSetup(context).build()
-                    .perform(get("/manager/").contextPath("/manager")).andReturn().getResponse();
+                    .perform(get("/manager/").contextPath("/manager").cookie(adminCookie())).andReturn().getResponse();
 
             String html = response.getContentAsString(StandardCharsets.UTF_8);
             assertEquals(200, response.getStatus());
@@ -75,7 +79,7 @@ class MvcConfigurationTest {
     void rendersContextRelativeArticleAndUploadEndpointsForTheEditor() throws Exception {
         try (GenericWebApplicationContext context = mvcContext()) {
             MockHttpServletResponse response = webAppContextSetup(context).build()
-                    .perform(get("/manager/article_admin").contextPath("/manager")).andReturn().getResponse();
+                    .perform(get("/manager/article_admin").contextPath("/manager").cookie(adminCookie())).andReturn().getResponse();
 
             String html = response.getContentAsString(StandardCharsets.UTF_8);
             assertEquals(200, response.getStatus());
@@ -94,7 +98,7 @@ class MvcConfigurationTest {
         }
     }
 
-    private static GenericWebApplicationContext mvcContext() throws Exception {
+    static GenericWebApplicationContext mvcContext() throws Exception {
         GenericWebApplicationContext context = new GenericWebApplicationContext();
         try {
             context.setServletContext(new MockServletContext("src/main/webapp", new FileSystemResourceLoader()));
@@ -113,6 +117,19 @@ class MvcConfigurationTest {
                         }
                         throw new UnsupportedOperationException(method.getName());
                     });
+            context.registerBean("tokenService", TokenService.class, () -> new TokenService() {
+                @Override
+                public Result getUserByToken(String token) {
+                    if (!"admin-session".equals(token)) return Result.build(201, "会话已过期");
+                    TbUser user = new TbUser();
+                    user.setId(7L);
+                    user.setUsername("管理员测试");
+                    user.setRole("ADMIN");
+                    return Result.ok(user);
+                }
+                @Override
+                public Result logout(String token) { return Result.ok(); }
+            });
             context.registerBean("articleService", ArticleService.class, () -> stub);
             context.registerBean("imageService", ImageService.class, () -> new ImageService() {
                 @Override
@@ -131,6 +148,23 @@ class MvcConfigurationTest {
         } catch (Exception e) {
             context.close();
             throw e;
+        }
+    }
+
+    private static Cookie adminCookie() {
+        return new Cookie(SessionSecurity.TOKEN_COOKIE, "admin-session");
+    }
+
+    @Test
+    void productionMvcBlocksAnonymousApiAndRedirectsPagesButKeepsImagesPublic() throws Exception {
+        try (GenericWebApplicationContext context = mvcContext()) {
+            MockMvc mvc = webAppContextSetup(context).build();
+            assertEquals(401, mvc.perform(get("/article/list")).andReturn().getResponse().getStatus());
+            MockHttpServletResponse page = mvc.perform(get("/")).andReturn().getResponse();
+            assertEquals(302, page.getStatus());
+            assertTrue(page.getRedirectedUrl().startsWith("http://localhost:8086/page/login?redirect="));
+            assertEquals(404, mvc.perform(get("/images/unknown")).andReturn().getResponse().getStatus());
+            assertEquals(200, mvc.perform(get("/js/editor.js")).andReturn().getResponse().getStatus());
         }
     }
 

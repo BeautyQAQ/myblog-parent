@@ -1,18 +1,15 @@
 package com.myblog.controller;
 
 import com.myblog.common.utils.Result;
+import com.myblog.common.content.ArticleHtmlSanitizer;
 import com.myblog.pojo.TbArticle;
+import com.myblog.pojo.TbUser;
 import com.myblog.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
-import javax.swing.border.EmptyBorder;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.Arrays;
 import java.util.List;
 
 @Controller
@@ -20,84 +17,93 @@ public class ArticleController {
     @Autowired
     private ArticleService articleService;
 
-    @RequestMapping("/")
-    public String index(){
-        return "index";
-    }
-    @RequestMapping("/article_admin")
-    public String type(){
-        return "article_admin";
-    }
+    @GetMapping("/")
+    public String index() { return "index"; }
 
-    @RequestMapping("/article/list")
+    @GetMapping("/article_admin")
+    public String articleAdmin() { return "article_admin"; }
+
+    @GetMapping("/article/list")
     @ResponseBody
-    public Result getArticleListPage(@RequestParam(value = "pageNum", defaultValue = "1")Integer pageNum,
-                                 @RequestParam(value = "pageSize", defaultValue = "6")Integer pageSize,
-                                 @RequestParam(value = "orderBy", defaultValue = "new")String orderBy){
-        Result articleListPage = articleService.getArticleListPage(pageNum, pageSize, orderBy);
-        return articleListPage;
+    public Result getArticleListPage(@RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "6") int pageSize,
+            @RequestParam(defaultValue = "new") String orderBy) {
+        return articleService.getArticleListPage(pageNum, pageSize, orderBy);
     }
 
-
-    /**
-     * 删除
-     * @param articleIds 文章id
-     * @return json
-     */
-    @RequestMapping("/article/del/{articleIds}")
+    @PostMapping("/article/del/{articleIds}")
     @ResponseBody
-    public Result deleteArticle(@PathVariable String articleIds){
-        if (articleIds.contains("-")){
-            //批量删除
-            List<Integer> articleIdsList = new ArrayList<Integer>();
-            String[] str_articleIds = articleIds.split("-");
-            for (String str : str_articleIds) {
-                articleIdsList.add(Integer.parseInt(str));
-            }
-            articleService.deleteBatch(articleIdsList);
-        }else {
-            //单个删除
-            articleService.deleteArticle(Integer.parseInt(articleIds));
+    public Result deleteArticle(@PathVariable String articleIds) {
+        if (!articleIds.matches("[1-9][0-9]*(?:-[1-9][0-9]*){0,99}")) {
+            throw new IllegalArgumentException("请选择有效的文章，每次最多删除100篇");
         }
+        List<Integer> ids = Arrays.stream(articleIds.split("-")).map(Integer::valueOf).distinct().toList();
+        if (ids.size() == 1) articleService.deleteArticle(ids.getFirst());
+        else articleService.deleteBatch(ids);
         return Result.ok();
     }
 
-    @RequestMapping("/article/add")
+    @PostMapping("/article/add")
     @ResponseBody
-    public Result addArticle(TbArticle tbArticle){
-        if ("".equals(tbArticle.getArticleTitle())){
-            return Result.build(400,"标题不能为空");
-        }
-        if ("<p><br></p>".equals(tbArticle.getArticleText())){
-            return Result.build(400,"文章不能为空");
-        }
-        tbArticle.setArticleAuthorId(10000);
-        tbArticle.setCreated(new Date());
-        tbArticle.setUpdated(new Date());
-        articleService.addArticle(tbArticle);
-        return Result.ok();
+    public Result addArticle(@ModelAttribute ArticleForm form, @RequestAttribute TbUser currentUser) {
+        TbArticle article = form.toArticle();
+        article.setArticleId(null);
+        article.setArticleAuthorId(Math.toIntExact(currentUser.getId()));
+        return Result.ok(articleService.createArticle(article));
     }
 
-    @RequestMapping("/article/get/{articleId}")
+    @GetMapping("/article/get/{articleId}")
     @ResponseBody
-    public Result getArticle(@PathVariable Integer articleId){
-        TbArticle tbArticle = articleService.getArticle(articleId);
-        return Result.ok(tbArticle);
+    public Result getArticle(@PathVariable int articleId) {
+        TbArticle article = articleService.getArticle(articleId);
+        if (article == null) throw new IllegalArgumentException("文章不存在");
+        article.setArticleText(ArticleHtmlSanitizer.cleanForDisplay(article.getArticleText()));
+        return Result.ok(article);
     }
 
-    @RequestMapping("/article/update")
+    @PostMapping("/article/update")
     @ResponseBody
-    public Result updateArticle(TbArticle tbArticle){
-        if ("".equals(tbArticle.getArticleTitle())){
-            return Result.build(400,"标题不能为空");
+    public Result updateArticle(@ModelAttribute ArticleForm form) {
+        TbArticle article = form.toArticle();
+        articleService.updateArticle(article);
+        return Result.ok(articleService.getArticle(article.getArticleId()));
+    }
+
+    @PostMapping("/article/status/{articleId}")
+    @ResponseBody
+    public Result changeStatus(@PathVariable int articleId, @RequestParam String articleStatus) {
+        TbArticle patch = new TbArticle();
+        patch.setArticleId(articleId);
+        patch.setArticleStatus(articleStatus);
+        articleService.updateArticle(patch);
+        return Result.ok(articleService.getArticle(articleId));
+    }
+
+    /** Deliberately excludes author, counters, timestamps, and other server-owned fields. */
+    public static class ArticleForm {
+        private Integer articleId;
+        private String articleTitle;
+        private String articleTag;
+        private String articleText;
+        private String articleStatus;
+        public Integer getArticleId() { return articleId; }
+        public void setArticleId(Integer value) { articleId = value; }
+        public String getArticleTitle() { return articleTitle; }
+        public void setArticleTitle(String value) { articleTitle = value; }
+        public String getArticleTag() { return articleTag; }
+        public void setArticleTag(String value) { articleTag = value; }
+        public String getArticleText() { return articleText; }
+        public void setArticleText(String value) { articleText = value; }
+        public String getArticleStatus() { return articleStatus; }
+        public void setArticleStatus(String value) { articleStatus = value; }
+        TbArticle toArticle() {
+            TbArticle article = new TbArticle();
+            article.setArticleId(articleId);
+            article.setArticleTitle(articleTitle);
+            article.setArticleTag(articleTag);
+            article.setArticleText(articleText);
+            article.setArticleStatus(articleStatus);
+            return article;
         }
-        System.out.println("++++++++++++++++++++++:"+tbArticle.getArticleText());
-        if ("<p><br></p>".equals(tbArticle.getArticleText())){
-            return Result.build(400,"文章不能为空");
-        }
-        tbArticle.getArticleId();
-        tbArticle.setUpdated(new Date());
-        articleService.updateArticle(tbArticle);
-        return Result.ok();
     }
 }

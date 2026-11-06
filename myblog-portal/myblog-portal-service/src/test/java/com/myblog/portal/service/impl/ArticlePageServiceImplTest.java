@@ -58,6 +58,35 @@ class ArticlePageServiceImplTest {
     }
 
     @Test
+    void invalidParametersNeverTouchRedisOrMySql() {
+        assertThrows(IllegalArgumentException.class, () -> service.getPortalArticleListPage(0, 10, "new"));
+        assertThrows(IllegalArgumentException.class, () -> service.getPortalArticleListPage(1, 0, "new"));
+        assertThrows(IllegalArgumentException.class, () -> service.getPortalArticleListPage(1, 101, "new"));
+        assertThrows(IllegalArgumentException.class, () -> service.getPortalArticleListPage(1, 10, "unexpected"));
+        assertThrows(IllegalArgumentException.class, () -> service.getArticleWithText(0));
+        assertEquals(0, queries.get());
+        assertTrue(cache.isEmpty());
+    }
+
+    @Test
+    void onlyLooksUpPublishedArticlesForPublicDetails() {
+        TbArticle article = new TbArticle();
+        article.setArticleId(42);
+        AtomicInteger details = new AtomicInteger();
+        TbArticleMapper publicMapper = (TbArticleMapper) Proxy.newProxyInstance(
+                TbArticleMapper.class.getClassLoader(), new Class<?>[]{TbArticleMapper.class}, (proxy, method, args) -> {
+                    assertEquals("selectPublishedByPrimaryKey", method.getName());
+                    details.incrementAndGet();
+                    return Integer.valueOf(42).equals(args[0]) ? article : null;
+                });
+        ArticlePageServiceImpl publicService = new ArticlePageServiceImpl(publicMapper, redis, 300, "test:articles");
+        assertSame(article, publicService.getArticleWithText(42));
+        assertNull(publicService.getArticleWithText(43));
+        assertEquals(2, details.get());
+        assertTrue(cache.isEmpty());
+    }
+
+    @Test
     void cachesEachPageSizeAndOrderSeparately() {
         service.getPortalArticleListPage(1, 10, "new");
         service.getPortalArticleListPage(2, 10, "new");
@@ -66,10 +95,10 @@ class ArticlePageServiceImplTest {
 
         assertEquals(4, queries.get());
         assertEquals(4, cache.size());
-        assertTrue(cache.containsKey("test:articles:v0:new:1:10"));
-        assertTrue(cache.containsKey("test:articles:v0:new:2:10"));
-        assertTrue(cache.containsKey("test:articles:v0:heat:1:10"));
-        assertTrue(cache.containsKey("test:articles:v0:new:1:20"));
+        assertTrue(cache.containsKey("test:articles:published:v0:new:1:10"));
+        assertTrue(cache.containsKey("test:articles:published:v0:new:2:10"));
+        assertTrue(cache.containsKey("test:articles:published:v0:heat:1:10"));
+        assertTrue(cache.containsKey("test:articles:published:v0:new:1:20"));
     }
 
     @Test
@@ -92,8 +121,8 @@ class ArticlePageServiceImplTest {
         service.getPortalArticleListPage(2, 10, "heat");
 
         assertEquals(4, queries.get());
-        assertTrue(cache.containsKey("test:articles:v1:new:1:10"));
-        assertTrue(cache.containsKey("test:articles:v1:heat:2:10"));
+        assertTrue(cache.containsKey("test:articles:published:v1:new:1:10"));
+        assertTrue(cache.containsKey("test:articles:published:v1:heat:2:10"));
     }
 
     @Test

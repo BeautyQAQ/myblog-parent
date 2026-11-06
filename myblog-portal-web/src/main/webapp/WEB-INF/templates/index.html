@@ -13,10 +13,10 @@
                         <img th:src="@{/resources/images/avatar-defualt.jpg}" class="blog-avatar-50" alt="作者头像">
                         <a th:href="@{/blogs(articleId=${item.articleId})}" class="card-link" th:text="${item.articleTitle}">文章标题</a>
                     </h2>
-                    <div class="card-text" th:utext="${item.articleText}">文章摘要</div>
+                    <div class="card-text" th:text="${articleSummaries[item.articleId]}">文章摘要</div>
                     <p class="card-text">
                         <span>管理员</span>
-                        <span th:text="${'发表于 ' + #dates.format(item.updated, 'yyyy-MM-dd HH:mm:ss')}">发布时间</span>
+                        <span th:text="${'发表于 ' + #dates.format(item.publishedAt != null ? item.publishedAt : item.created, 'yyyy-MM-dd HH:mm:ss')}">发布时间</span>
                         <i class="fa fa-eye" aria-label="浏览量" th:text="${item.articlePageviews}"></i>
                         <i class="fa fa-heart-o" aria-label="点赞数" th:text="${item.articleLikecount}"></i>
                         <i class="fa fa-comment-o" aria-label="评论数" th:text="${item.articleComment}"></i>

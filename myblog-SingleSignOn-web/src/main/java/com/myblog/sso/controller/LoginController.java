@@ -1,8 +1,9 @@
 package com.myblog.sso.controller;
 
-import com.myblog.common.utils.CookieUtils;
+import com.myblog.common.security.SessionSecurity;
 import com.myblog.common.utils.Result;
 import com.myblog.sso.service.LoginService;
+import com.myblog.sso.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -18,29 +19,33 @@ import jakarta.servlet.http.HttpServletResponse;
 public class LoginController {
     @Autowired
     private LoginService loginService;
-    @Value("${TOKEN_KEY}")
-    private String TOKEN_KEY;
+    @Autowired
+    private TokenService tokenService;
     @Value("${portal.public-base-url:http://localhost:8082}")
     private String portalBaseUrl;
+    @Value("${manager.public-base-url:http://localhost:8084}")
+    private String managerBaseUrl;
 
     @RequestMapping("/page/login")
     public String showLogin(String redirect, Model model) {
-        model.addAttribute("redirect", SsoPageModel.loginDestination(portalBaseUrl, redirect));
+        model.addAttribute("redirect", SsoPageModel.loginDestination(portalBaseUrl, managerBaseUrl, redirect));
         return "login";
     }
 
-    @RequestMapping(value="/user/login", method= RequestMethod.POST)
+    @RequestMapping(value="/user/login", method=RequestMethod.POST)
     @ResponseBody
     public Result login(String username, String password,
                         HttpServletRequest request, HttpServletResponse response) {
-        Result Result = loginService.userLogin(username, password);
-        //判断是否登录成功
-        if(Result.getStatus() == 200) {
-            String token = Result.getData().toString();
-            //如果登录成功需要把token写入cookie
-            CookieUtils.setCookie(request, response, TOKEN_KEY, token);
+        if (!SessionFormSecurity.valid(request)) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            return Result.build(403, "页面已过期，请刷新后重试");
         }
-        //返回结果
-        return Result;
+        Result result = loginService.userLogin(username, password);
+        if (result.getStatus() == 200) {
+            tokenService.logout(SessionSecurity.readToken(request));
+            SessionSecurity.setTokenCookie(request, response, result.getData().toString());
+            request.getSession(false).invalidate();
+        }
+        return result;
     }
 }

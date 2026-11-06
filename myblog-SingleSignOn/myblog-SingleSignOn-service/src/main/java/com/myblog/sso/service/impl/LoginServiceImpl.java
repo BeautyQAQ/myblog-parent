@@ -1,6 +1,7 @@
 package com.myblog.sso.service.impl;
 
 import com.myblog.common.jedis.JedisClient;
+import com.myblog.common.security.PasswordSecurity;
 import com.myblog.common.utils.JsonUtils;
 import com.myblog.common.utils.Result;
 import com.myblog.mapper.TbUserMapper;
@@ -10,8 +11,8 @@ import com.myblog.sso.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.DigestUtils;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,35 +24,32 @@ public class LoginServiceImpl implements LoginService {
     private JedisClient jedisClient;
     @Value("${SESSION_EXPIRE}")
     private Integer SESSION_EXPIRE;
+
     @Override
     public Result userLogin(String username, String password) {
-        // 1、判断用户和密码是否正确
-        //根据用户名查询用户信息
+        if (username == null || username.isBlank() || username.length() > 50
+                || password == null || password.isBlank() || password.length() > 128) {
+            return Result.build(400, "用户名或密码错误");
+        }
         TbUserExample example = new TbUserExample();
-        TbUserExample.Criteria criteria = example.createCriteria();
-        criteria.andUsernameEqualTo(username);
-        //执行查询
-        List<TbUser> list = userMapper.selectByExample(example);
-        if (list == null || list.size() == 0) {
-            //返回登录失败
+        example.createCriteria().andUsernameEqualTo(username.trim());
+        List<TbUser> users = userMapper.selectByExample(example);
+        if (users == null || users.isEmpty() || !PasswordSecurity.matches(password, users.getFirst().getPassword())) {
             return Result.build(400, "用户名或密码错误");
         }
-        //取用户信息
-        TbUser user = list.get(0);
-        //判断密码是否正确
-        if (!DigestUtils.md5DigestAsHex(password.getBytes()).equals(user.getPassword())) {
-            // 2、如果不正确，返回登录失败
-            return Result.build(400, "用户名或密码错误");
+        TbUser user = users.getFirst();
+        if (PasswordSecurity.isLegacyHash(user.getPassword())) {
+            TbUser update = new TbUser();
+            update.setId(user.getId());
+            update.setPassword(PasswordSecurity.hash(password));
+            update.setUpdated(new Date());
+            userMapper.updateByPrimaryKeySelective(update);
         }
-        // 3、如果正确生成token。
         String token = UUID.randomUUID().toString();
-        // 4、把用户信息写入redis，key：token value：用户信息
-        user.setPassword(null);
-        jedisClient.set("SESSION:" + token, JsonUtils.objectToJson(user));
-        // 5、设置Session的过期时间
-        jedisClient.expire("SESSION:" + token, SESSION_EXPIRE);
-        // 6、把token返回
-
+        // Persist only the identity. Token lookups reload current roles and public profile data.
+        TbUser identity = new TbUser();
+        identity.setId(user.getId());
+        jedisClient.setex("SESSION:" + token, SESSION_EXPIRE, JsonUtils.objectToJson(identity));
         return Result.ok(token);
     }
 }

@@ -2,6 +2,7 @@
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8" />
+    <meta name="csrf-token" th:content="${csrfToken}" />
     <title>文章管理</title>
     <link rel="stylesheet" href="/css/Site.css" th:href="@{/css/Site.css}"/>
     <link rel="stylesheet" href="/css/all.css" th:href="@{/css/all.css}"/>
@@ -11,8 +12,9 @@
     <link href="/resources/bootstrap-3.3.7-dist/css/bootstrap.min.css" th:href="@{/resources/bootstrap-3.3.7-dist/css/bootstrap.min.css}" rel="stylesheet">
 </head>
 <body id="article-admin"
-      th:attr="data-list-url=@{/article/list},data-delete-url=@{/article/del/},data-detail-url=@{/article/get/},data-add-url=@{/article/add},data-update-url=@{/article/update},data-upload-url=@{/upload}">
+      th:attr="data-list-url=@{/article/list},data-delete-url=@{/article/del/},data-detail-url=@{/article/get/},data-add-url=@{/article/add},data-update-url=@{/article/update},data-upload-url=@{/upload},data-status-url=@{/article/status/}">
 <div class="dvcontent">
+    <div id="admin-message" class="alert" role="status" aria-live="polite" style="display: none;"></div>
 
     <div>
         <!--tab start-->
@@ -34,6 +36,7 @@
                                     <th><input type="checkbox" id="check_all" /></th>
                                     <th>文章标题</th>
                                     <th>文章标签</th>
+                                    <th>状态</th>
                                     <th>浏览量</th>
                                     <th>点赞数</th>
                                     <th>评论数</th>
@@ -60,19 +63,30 @@
                         <!-- content start -->
                         <div class="modal-body">
                             <form id="form" method="post">
+                                <p>当前状态：<strong id="articleStatusLabel">新草稿</strong>
+                                    <button id="newArticleBtn" type="button" class="btn btn-default btn-sm">新建文章</button>
+                                </p>
                                 <div class="form-group">
                                     <label for="articleTitle">标题</label>
-                                    <input id="articleTitle" class="form-control" type="text" name="articleTitle" placeholder="标题">
+                                    <input id="articleTitle" class="form-control" type="text" name="articleTitle" placeholder="标题" maxlength="50" required>
                                 </div>
                                 <label for="articleTag">标签</label>
-                                <input id="articleTag" class="form-control" type="text" name="articleTag" placeholder="标签">
+                                <input id="articleTag" class="form-control" type="text" name="articleTag" placeholder="标签" maxlength="50">
                                 <div id="articleEditor">
                                     <!--编辑器-->
                                 </div>
+                                <div id="editor-message" class="alert" role="status" aria-live="polite" style="display: none;"></div>
                                 <div class="modal-footer">
+                                    <button id="previewBtn" type="button" class="btn btn-default">预览</button>
+                                    <button id="saveDraftBtn" type="button" class="btn btn-default">保存草稿</button>
                                     <button id="submitBtn" type="button" class="btn btn-primary">发布文章</button>
                                 </div>
                             </form>
+                            <section id="articlePreview" style="display: none;" aria-label="文章预览">
+                                <p class="text-muted">以下为当前编辑内容的预览，保存草稿不会公开文章。</p>
+                                <h2 id="previewTitle"></h2>
+                                <iframe id="previewFrame" title="文章正文预览" sandbox="" style="width: 100%; height: 420px; border: 1px solid #ddd;"></iframe>
+                            </section>
                         </div>
                         <!-- end-->
                     </div>

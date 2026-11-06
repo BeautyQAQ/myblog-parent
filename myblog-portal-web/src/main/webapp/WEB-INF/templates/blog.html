@@ -14,7 +14,7 @@
                     </h1>
                     <p class="card-text">
                         <span>管理员</span>
-                        <span th:text="${'发表于 ' + #dates.format(articleWithText.updated, 'yyyy-MM-dd HH:mm:ss')}">发布时间</span>
+                        <span th:text="${'发表于 ' + #dates.format(articleWithText.publishedAt != null ? articleWithText.publishedAt : articleWithText.created, 'yyyy-MM-dd HH:mm:ss')}">发布时间</span>
                         <i class="fa fa-eye" aria-label="浏览量" th:text="${articleWithText.articlePageviews}"></i>
                         <i class="fa fa-heart-o" aria-label="点赞数" th:text="${articleWithText.articleLikecount}"></i>
                         <i class="fa fa-comment-o" aria-label="评论数" th:text="${articleWithText.articleComment}"></i>

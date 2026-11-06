@@ -11,6 +11,16 @@
 
 	<context:component-scan base-package="com.myblog.controller" />
 	<mvc:annotation-driven />
+		<mvc:interceptors>
+			<mvc:interceptor>
+				<mvc:mapping path="/**"/>
+				<mvc:exclude-mapping path="/css/**"/>
+				<mvc:exclude-mapping path="/js/**"/>
+				<mvc:exclude-mapping path="/resources/**"/>
+				<mvc:exclude-mapping path="/images/**"/>
+				<ref bean="managerAccessInterceptor"/>
+			</mvc:interceptor>
+		</mvc:interceptors>
 	<bean id="templateResolver" class="org.thymeleaf.spring6.templateresolver.SpringResourceTemplateResolver">
 		<property name="prefix" value="/WEB-INF/templates/" />
 		<property name="suffix" value=".html" />
@@ -43,6 +53,7 @@
 	<!-- 引用dubbo服务 -->
 	<dubbo:application name="myblog-manager-web" qos-enable="false"/>
 	<dubbo:registry address="N/A"/>
+		<dubbo:reference interface="com.myblog.sso.service.TokenService" id="tokenService" url="${dubbo.sso.url}" check="false" retries="0" timeout="10000"/>
 	<dubbo:reference interface="com.myblog.service.ArticleService" id="articleService" url="${dubbo.manager.url}" check="false" retries="0" timeout="45000"/>
 	<dubbo:reference interface="com.myblog.service.ImageService" id="imageService" url="${dubbo.manager.url}" check="false" retries="0" timeout="10000"/>
 </beans>

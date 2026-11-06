@@ -2,6 +2,7 @@
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head th:fragment="head(title)">
     <meta charset="UTF-8">
+    <meta name="csrf-token" th:content="${csrfToken}">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title th:text="${title}">NewStarBlog</title>
     <link rel="icon" th:href="@{/resources/favicon.ico}">
@@ -25,8 +26,18 @@
                 <li class="nav-item"><a class="nav-link" th:href="@{/(orderBy='new')}">最新</a></li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/(orderBy='heat')}">最热</a></li>
             </ul>
-            <a th:href="${ssoPublicBaseUrl + '/page/login'}" class="btn btn-outline-success my-2 my-sm-0">登录</a>
-            <a th:href="${ssoPublicBaseUrl + '/page/register'}" class="btn btn-outline-success my-2 my-sm-0 ml-2">注册</a>
+            <th:block th:if="${currentUser == null}">
+                <a th:href="${ssoPublicBaseUrl + '/page/login'}" class="btn btn-outline-success my-2 my-sm-0">登录</a>
+                <a th:href="${ssoPublicBaseUrl + '/page/register'}" class="btn btn-outline-success my-2 my-sm-0 ml-2">注册</a>
+            </th:block>
+            <th:block th:if="${currentUser != null}">
+                <span class="navbar-text mr-3" th:text="${currentUser.username}">用户名</span>
+                <a th:if="${currentUser.role == 'ADMIN'}" th:href="${managerPublicBaseUrl + '/'}" class="btn btn-outline-success mr-2">管理文章</a>
+                <form id="logout-form" th:action="@{/auth/logout}" method="post" class="form-inline">
+                    <button type="submit" class="btn btn-outline-success">退出登录</button>
+                </form>
+                <span id="session-message" class="navbar-text ml-2" role="status" aria-live="polite"></span>
+            </th:block>
         </div>
     </div>
 </nav>
@@ -40,6 +51,7 @@
     <script th:src="@{/js/bootstrap.min.js}"></script>
     <script th:src="@{/js/nprogress.js}"></script>
     <script th:src="@{/js/main.js}"></script>
+    <script th:src="@{/js/session.js}"></script>
     <script th:src="@{/js/my.js}"></script>
 </th:block>
 </body>

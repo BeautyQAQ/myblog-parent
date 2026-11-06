@@ -2,6 +2,8 @@
 
 三个 Web 模块使用 Spring MVC + Thymeleaf 服务端渲染，替代原 JSP。页面、CSS、JavaScript 随 WAR 一起构建和部署，不需要前后端分离、Node.js 或单独的前端构建步骤。JDK 21、Spring Framework 7、Dubbo 和数据服务的运行方式见 [部署说明](upgrade-jdk21.md)。
 
+本文记录页面迁移阶段。后续新增的登录权限、CSRF、草稿 / 发布 / 下架及真实账号验证见 [博客核心功能](core-features.md)。
+
 ## 模板与配置
 
 根 pom.xml 管理 Thymeleaf 3.1.5.RELEASE。三个 Web 模块引用 thymeleaf-spring6，并在各自 src/main/resources/spring/springmvc.xml 配置：

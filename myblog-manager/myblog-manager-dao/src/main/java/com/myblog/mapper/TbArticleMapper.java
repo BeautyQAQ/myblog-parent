@@ -22,6 +22,8 @@ public interface TbArticleMapper {
 
     TbArticle selectByPrimaryKey(Integer articleId);
 
+    TbArticle selectPublishedByPrimaryKey(int articleId);
+
     List<TbArticle> selectAllOrderByHeat();
 
     List<TbArticle> selectAllOrderByNew();

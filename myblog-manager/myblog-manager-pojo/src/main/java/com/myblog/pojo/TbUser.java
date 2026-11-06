@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.util.Date;
 
 public class TbUser implements Serializable {
+    public static final String ROLE_USER = "USER";
+    public static final String ROLE_ADMIN = "ADMIN";
+
     private Long id;
 
     private String username;
@@ -13,6 +16,8 @@ public class TbUser implements Serializable {
     private String phone;
 
     private String email;
+
+    private String role;
 
     private Date created;
 
@@ -39,7 +44,7 @@ public class TbUser implements Serializable {
     }
 
     public void setPassword(String password) {
-        this.password = password == null ? null : password.trim();
+        this.password = password;
     }
 
     public String getPhone() {
@@ -60,6 +65,14 @@ public class TbUser implements Serializable {
 
     public Date getCreated() {
         return created;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public void setCreated(Date created) {

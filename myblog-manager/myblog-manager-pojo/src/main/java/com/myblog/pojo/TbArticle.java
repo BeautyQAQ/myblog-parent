@@ -28,6 +28,26 @@ public class TbArticle implements Serializable {
 
     private String articleText;
 
+    private String articleStatus;
+
+    private Date publishedAt;
+
+    public String getArticleStatus() {
+        return articleStatus;
+    }
+
+    public void setArticleStatus(String articleStatus) {
+        this.articleStatus = articleStatus == null ? null : articleStatus.trim();
+    }
+
+    public Date getPublishedAt() {
+        return publishedAt;
+    }
+
+    public void setPublishedAt(Date publishedAt) {
+        this.publishedAt = publishedAt;
+    }
+
     public Integer getArticleId() {
         return articleId;
     }

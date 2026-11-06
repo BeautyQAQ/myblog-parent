@@ -9,6 +9,10 @@
 
 项目将 Web 页面与业务服务拆成独立工程。后台提供文章管理，前台展示文章列表和详情，SSO 工程包含注册、登录与 token 查询。评论、点赞、浏览量和热度等功能仍属于后续完善方向。
 
+博客核心功能已加入管理员登录与后台保护、退出、草稿 / 发布 / 下架、后台预览、正文清洗和友好 404。公开注册默认普通用户，需明确指定管理员才能管理文章。升级现有环境先执行 V3、V4 数据迁移，管理员初始化与功能说明见 [博客核心功能](docs/core-features.md)。
+
+核心功能改造已完成 JDK 21 下 16 模块 clean install、91 项测试、六个 WAR 的 29 项真实 HTTP 检查，以及 Chrome 完整写作与退出流程验证。
+
 main 使用 Spring MVC、Thymeleaf、MyBatis 和 Dubbo 独立服务。门户、后台与登录注册页面由 Java 服务端渲染，模板与静态资源随 WAR 部署，无需独立前端工程或 Node.js 运行环境。MySQL 存储业务数据，Redis 提供文章缓存和登录会话，Kafka 传递文章变更后的缓存失效事件。图片以 MEDIUMBLOB 保存在 MySQL，通过 manager-web 的 /images/{id} 接口读取。Dubbo 使用可配置地址直连，应用不依赖 ZooKeeper 或 ActiveMQ。
 
 ## 升级基线与进度
@@ -38,7 +42,7 @@ mvn clean install
 
 切换其他环境时，可使用 [myblog-local.example.properties](myblog-local.example.properties) 作为可选覆盖模板，并通过 MYBLOG_CONFIG_LOCATION 指向外部文件，例如 file:/绝对路径/myblog-local.properties。使用仓库默认环境时无需复制模板或设置该变量。
 
-新环境先对独立 myblog 库执行 [V1__initial_schema.sql](db/migration/V1__initial_schema.sql) 和 [V2__images.sql](db/migration/V2__images.sql)，并预创建 Kafka topic；这些步骤不会由应用自动执行。当前 NAS 环境已完成初始化。原始 [myblog.sql](myblog.sql) 作为历史资料保留，详见升级说明。
+新环境先对独立 myblog 库按顺序执行 [V1](db/migration/V1__initial_schema.sql)、[V2](db/migration/V2__images.sql)、[V3](db/migration/V3__account_security.sql)、[V4](db/migration/V4__article_lifecycle.sql)，并预创建 Kafka topic；这些步骤不会由应用自动执行。当前 NAS 环境已完成四次迁移。已有 V1、V2 的环境只执行 V3、V4，各脚本只执行一次。原始 [myblog.sql](myblog.sql) 作为历史资料保留，详见升级说明。
 
 从仓库根目录，在**独立终端**按以下顺序启动六个 WAR。每个终端都需设置 JDK 21：
 

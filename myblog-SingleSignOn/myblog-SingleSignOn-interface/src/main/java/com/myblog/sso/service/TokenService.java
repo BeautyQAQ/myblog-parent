@@ -12,4 +12,6 @@ import com.myblog.common.utils.Result;
 
 public interface TokenService {
     Result getUserByToken(String token);
+
+    Result logout(String token);
 }

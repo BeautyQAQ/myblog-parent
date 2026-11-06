@@ -15,6 +15,9 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpSession;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.support.GenericWebApplicationContext;
@@ -47,7 +50,8 @@ class SsoPageRenderingTest {
         context = new GenericWebApplicationContext();
         context.setServletContext(new MockServletContext("src/main/webapp", new FileSystemResourceLoader()));
         context.getEnvironment().getPropertySources().addFirst(new MapPropertySource("page-test",
-                Map.of("portal.public-base-url", "https://blog.example.test/blog/")));
+                Map.of("portal.public-base-url", "https://blog.example.test/blog/",
+                        "manager.public-base-url", "https://admin.example.test/manager/")));
         context.registerBean("loginService", LoginService.class, () -> (username, password) -> {
             loginCredentials.set(username + ":" + password);
             return Result.ok("test-session-token");
@@ -64,7 +68,10 @@ class SsoPageRenderingTest {
                 return Result.ok();
             }
         });
-        context.registerBean("tokenService", TokenService.class, () -> token -> Result.ok());
+        context.registerBean("tokenService", TokenService.class, () -> new TokenService() {
+            @Override public Result getUserByToken(String token) { return Result.ok(); }
+            @Override public Result logout(String token) { return Result.ok(); }
+        });
         new XmlBeanDefinitionReader(context).loadBeanDefinitions(mvcXmlWithoutDubbo());
         context.refresh();
         mockMvc = webAppContextSetup(context).build();
@@ -135,7 +142,7 @@ class SsoPageRenderingTest {
 
     @Test
     void preservesLoginFormBindingAndTheSessionCookie() throws Exception {
-        MockHttpServletResponse response = mockMvc.perform(post("/sso/user/login").contextPath("/sso")
+        MockHttpServletResponse response = mockMvc.perform(postWithCsrf("/sso/user/login").contextPath("/sso").secure(true)
                         .param("username", "student").param("password", "test-password"))
                 .andReturn().getResponse();
         assertEquals(200, response.getStatus());
@@ -144,19 +151,72 @@ class SsoPageRenderingTest {
         assertNotNull(response.getCookie("MYBLOG_TOKEN"));
         assertEquals("test-session-token", response.getCookie("MYBLOG_TOKEN").getValue());
         assertEquals("/", response.getCookie("MYBLOG_TOKEN").getPath());
+        assertTrue(response.getCookie("MYBLOG_TOKEN").isHttpOnly());
+        assertTrue(response.getCookie("MYBLOG_TOKEN").getSecure());
+        assertEquals("Lax", response.getCookie("MYBLOG_TOKEN").getAttribute("SameSite"));
     }
 
     @Test
     void preservesRegistrationFormBinding() throws Exception {
-        MockHttpServletResponse response = mockMvc.perform(post("/sso/user/register").contextPath("/sso")
+        MockHttpServletResponse response = mockMvc.perform(postWithCsrf("/sso/user/register").contextPath("/sso")
                         .param("username", "student").param("password", "test-password")
-                        .param("email", "student@example.test").param("phone", "12345678901"))
+                        .param("email", "student@example.test").param("phone", "12345678901")
+                        .param("id", "1").param("role", "ADMIN"))
                 .andReturn().getResponse();
         assertEquals(200, response.getStatus());
         assertEquals(200, new ObjectMapper().readTree(response.getContentAsString()).path("status").asInt());
         assertEquals("student", registeredUser.get().getUsername());
+        assertNull(registeredUser.get().getId());
+        assertEquals(TbUser.ROLE_USER, registeredUser.get().getRole());
         assertEquals("student@example.test", registeredUser.get().getEmail());
         assertEquals("12345678901", registeredUser.get().getPhone());
+    }
+
+    @Test
+    void requiresCsrfForBothAnonymousWriteEndpoints() throws Exception {
+        for (String path : new String[]{"/user/login", "/user/register"}) {
+            var response = mockMvc.perform(post(path).param("username", "student")
+                            .param("password", "test-password").header("X-CSRF-Token", "forged"))
+                    .andReturn().getResponse();
+            assertEquals(403, response.getStatus());
+        }
+        assertNull(loginCredentials.get());
+        assertNull(registeredUser.get());
+    }
+
+    @Test
+    void formCsrfIsPresentInTheRenderedPageAndBoundToItsSession() throws Exception {
+        var result = mockMvc.perform(get("/page/login")).andReturn();
+        var session = (MockHttpSession) result.getRequest().getSession(false);
+        assertNotNull(session);
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setSession(session);
+        String csrf = SessionFormSecurity.token(request);
+        assertTrue(result.getResponse().getContentAsString().contains("content=\"" + csrf + "\""));
+        MockHttpServletRequest other = new MockHttpServletRequest();
+        assertNotEquals(csrf, SessionFormSecurity.token(other));
+        var response = mockMvc.perform(post("/user/login").session((MockHttpSession) other.getSession())
+                        .header("X-CSRF-Token", csrf).param("username", "student").param("password", "test-password"))
+                .andReturn().getResponse();
+        assertEquals(403, response.getStatus());
+    }
+
+    @Test
+    void acceptsOnlyConfiguredPortalAndManagerContextPaths() {
+        String portal = "https://blog.example.test/blog/";
+        String manager = "https://admin.example.test/manager/";
+        assertEquals(manager + "article_admin", SsoPageModel.loginDestination(portal, manager, manager + "article_admin"));
+        for (String destination : new String[]{"https://admin.example.test/other/", "https://admin.example.test/manager-evil/",
+                "https://admin.example.test/manager/%2e%2e/other", "https://admin.example.test/manager/../other",
+                "https://admin.example.test:8443/manager/", "https://evil.example/manager/"}) {
+            assertEquals(portal, SsoPageModel.loginDestination(portal, manager, destination), destination);
+        }
+    }
+
+    private static MockHttpServletRequestBuilder postWithCsrf(String path) {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        String csrf = SessionFormSecurity.token(request);
+        return post(path).session((MockHttpSession) request.getSession()).header("X-CSRF-Token", csrf);
     }
 
     private static ByteArrayResource mvcXmlWithoutDubbo() throws Exception {

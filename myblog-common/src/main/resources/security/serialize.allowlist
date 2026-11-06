@@ -1,0 +1,3 @@
+# Result.data is Object, so TokenService cannot infer this DTO from its signature.
+# Keep Dubbo STRICT enabled and allow only the account DTO returned by SSO.
+com.myblog.pojo.TbUser

@@ -1,285 +1,244 @@
-var articleAdminUrls = document.getElementById("article-admin").dataset;
-var updateArticleFlag=false;//文章更新记号
-var updateArticleId=0;//要更新的文章id
-var totalRecord, currentPage; //总记录数
-//1.页面加载完成以后，直接发送ajax请求，要到分页数据
-$(function () {
-    to_page(1);
-});
+var articleAdminUrls = document.getElementById('article-admin').dataset;
+var updateArticleFlag = false;
+var updateArticleId = 0;
+var currentArticleStatus = 'DRAFT';
+var currentPage = 1;
+var savedArticleSnapshot = '';
+var articleLoadInProgress = false;
 
-//ajax方法
-function to_page(pn) {
+function articleCsrfHeaders() {
+    return {'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content};
+}
+
+function showAdminMessage(message, isError) {
+    $('#admin-message, #editor-message').text(message).removeClass('alert-danger alert-success')
+        .addClass(isError ? 'alert-danger' : 'alert-success').show();
+}
+
+function requestFailure(xhr, fallback) {
+    var result = xhr && xhr.responseJSON;
+    showAdminMessage(result && result.msg ? result.msg : fallback, true);
+}
+
+function articleSnapshot() {
+    return JSON.stringify([$('#articleTitle').val(), $('#articleTag').val(), editor.txt.html()]);
+}
+
+function articleHasChanges() {
+    return savedArticleSnapshot && articleSnapshot() !== savedArticleSnapshot;
+}
+
+function showArticleEditor() {
+    $('#writeBlog').addClass('on');
+    $('#articleManager').removeClass('on');
+    $('#articleAttributes').hide();
+    $('#articleEdit').show();
+}
+
+function statusName(status) {
+    return {DRAFT: '草稿', PUBLISHED: '已发布', OFFLINE: '已下架'}[status] || '未知状态';
+}
+
+function to_page(page) {
     $.ajax({
         url: articleAdminUrls.listUrl,
-        data:"pageNum="+pn,
-        type:"GET",
-        success:function (result) {
-            //console.log(result);
-            //1.解析并显示文章数据
-            build_article_table(result);
-            //2.解析并显示分页信息
-            build_page_info(result);
-            //3.解析显示分页条
-            build_page_nav(result);
-        }
-    });
-}
-
-//解析并显示文章数据
-function build_article_table(result) {
-    $("#tbRecord tbody").empty();
-    var articleList = result.data.list;
-    $.each(articleList, function (index, item) {
-        var checkBoxTd = $("<td><input type='checkbox' class='check_item'/></td>");
-        var articleTitle = $("<td></td>").text(item.articleTitle);
-        var articleTag = $("<td></td>").text(item.articleTag);
-        var articlePageviews = $("<td></td>").append(item.articlePageviews);
-        var articleLikecount = $("<td></td>").append(item.articleLikecount);
-        var articleComment = $("<td></td>").append(item.articleComment);
-        var articleHeat = $("<td></td>").append(item.articleHeat);
-        var createDate=item.created;
-        var created = $("<td></td>").append(Format(createDate,"yyyy-MM-dd hh:mm:ss"));
-        var updateDate=item.updated;
-        var updated = $("<td></td>").append(Format(updateDate,"yyyy-MM-dd hh:mm:ss"));
-        var editBtn = $("<button></button>").addClass("btn btn-primary btn-sm edit_btn").append($(
-            "<span></span>").addClass("glyphicon glyphicon-pencil")).append("编辑");
-        //给编辑按钮添加一个属性，保存文章id
-        editBtn.attr("edit-id", item.articleId);
-        var delBtn = $("<button></button>").addClass("btn btn-danger btn-sm delete_btn").append($(
-            "<span></span>").addClass("glyphicon glyphicon-trash")).append("删除");
-        //给删除按钮添加一个属性，保存文章id
-        delBtn.attr("del-id", item.articleId);
-        var btnTd = $("<td></td>").append(editBtn).append(" ").append(delBtn);
-        $("<tr></tr>").append(checkBoxTd).append(articleTitle).append(articleTag).append(articlePageviews)
-            .append(articleLikecount).append(articleComment).append(articleHeat).append(created).append(updated).append(btnTd)
-            .appendTo("#tbRecord tbody");
-    });
-}
-//解析显示分页信息
-function build_page_info(result) {
-    $("#page_info_area").empty();
-    $("#page_info_area").append("当前" + result.data.pageNum + "页,共有" + result.data.pages +
-        "页,共有" + result.data.total + "条记录");
-    totalRecord = result.data.total;
-    currentPage = result.data.pageNum;
-}
-//解析显示分页条
-function build_page_nav(result) {
-    $("#page_nav_area").empty();
-    var ul = $("<ul></ul>").addClass("pagination");
-    var firstPageLi = $("<li></li>").append($("<a></a>").append("首页").attr("href", "#"));
-    var prePageLi = $("<li></li>").append($("<a></a>").append("&laquo;"));
-    if (result.data.hasPreviousPage == false) {
-        firstPageLi.addClass("disabled");
-        prePageLi.addClass("disabled");
-    } else {
-        firstPageLi.click(function () {
-            to_page(1);
-        });
-        prePageLi.click(function () {
-            to_page(result.data.pageNum - 1);
-        });
-    }
-    //先添加首页和前一页
-    ul.append(firstPageLi).append(prePageLi);
-    var nextPageLi = $("<li></li>").append($("<a></a>").append("&raquo;"));
-    var lastPageLi = $("<li></li>").append($("<a></a>").append("末页").attr("href", "#"));
-    if (result.data.hasNextPage == false) {
-        lastPageLi.addClass("disabled");
-        nextPageLi.addClass("disabled");
-    } else {
-        lastPageLi.click(function () {
-            to_page(result.data.pages);
-        });
-        nextPageLi.click(function () {
-            to_page(result.data.pageNum + 1);
-        });
-    }
-
-
-
-    //遍历分页条
-    $.each(result.data.navigatepageNums, function (index, item) {
-        var numLi = $("<li></li>").append($("<a></a>").append(item));
-        if (result.data.pageNum == item) {
-            numLi.addClass("active");
-        }
-        numLi.click(function () {
-            to_page(item);
-        });
-        ul.append(numLi);
-    });
-
-    //最后添加末页和后一页
-    ul.append(nextPageLi).append(lastPageLi);
-
-    //把ul添加到nav中
-    var navElm = $("<nav></nav>").append(ul);
-    navElm.appendTo("#page_nav_area");
-}
-
-
-
-
-
-//单个删除
-$(document).on("click", ".delete_btn", function () {
-    //alert($(this).parents("tr").find("td:eq(1)").text());
-    var title = $(this).parents("tr").find("td:eq(1)").text();
-    var articleId = $(this).attr("del-id");
-    if (confirm("你确定要删除【" + title + "】?")) {
-        $.ajax({
-            url: articleAdminUrls.deleteUrl + articleId,
-            type: "POST",
-            success: function (result) {
-                alert(result.msg);
-                to_page(currentPage);
+        data: {pageNum: page},
+        type: 'GET',
+        dataType: 'json',
+        success: function (result) {
+            if (!result || result.status !== 200 || !result.data || !Array.isArray(result.data.list)) {
+                showAdminMessage(result && result.msg ? result.msg : '文章列表加载失败', true);
+                return;
             }
-        })
-    }
-});
-
-
-
-
-
-
-//全选/全不选
-$("#check_all").click(function () {
-    //attr获取checked是undefined
-    //dom原生的属性，用prop获取属性值，自定义属性，用attr获取
-    $(".check_item").prop("checked", $(this).prop("checked"));
-});
-
-$(document).on("click", ".check_item", function () {
-    //判断当前选中元素是否为10个
-    var flag = $(".check_item:checked").length == $(".check_item").length;
-    $("#check_all").prop("checked", flag);
-});
-
-//点击全部删除，就执行批量删除
-$("#emp_delete_all_btn").click(function () {
-    if ($(".check_item:checked").length > 0) {
-        var articleTitles = "";
-        var del_idstr = "";
-        $.each($(".check_item:checked"), function () {
-            articleTitles += $(this).parents("tr").find("td:eq(1)").text() + ",";
-            del_idstr += $(this).parents("tr").find("td:eq(9)").find("button:eq(1)").attr("del-id") + "-";
-        });
-        console.log(del_idstr);
-        //去除多余的，
-        articleTitles = articleTitles.substring(0, articleTitles.length - 1);
-        //去除多余的-
-        del_idstr = del_idstr.substring(0, del_idstr.length - 1);
-        if (confirm("确认删除【" + articleTitles + "】吗？")) {
-            //true表示确认删除，发送ajax请求
-            $.ajax({
-                url: articleAdminUrls.deleteUrl + del_idstr,
-                type: "POST",
-                success: function (result) {
-                    $("#check_all").prop("checked",false);
-                    alert(result.msg);
-                    to_page(currentPage);
-                }
-            });
-        }
-    }
-});
-
-
-//1.在按钮创建之前就绑定单击事件，所以绑定失败。
-//解决办法1.在按钮创建时绑定
-//2.live()方法
-//jQuery新版没有live方法，用on方法替代
-$(document).on("click",".edit_btn",function () {
-    updateArticleFlag=true;
-    updateArticleId=$(this).attr("edit-id");
-    $("#writeBlog").addClass("on");
-    $("#articleManager").removeClass("on");
-    $("#articleAttributes").toggle();
-    $("#articleEdit").toggle();
-    //查询信息，显示在富文本编辑框中
-    getArticle($(this).attr("edit-id"));
-    //将文章id传递给富文本编辑器的更新按钮
-    $("#submitBtn").attr("edit-id",$(this).attr("edit-id"));
-});
-
-function getArticle(articleId){
-    $.ajax({
-        url:articleAdminUrls.detailUrl+articleId,
-        type:"GET",
-        success:function (result) {
-            console.log(result);
-            var articleData=result.data;
-            $("#articleTitle").val(articleData.articleTitle);
-            $("#articleTag").val(articleData.articleTag);
-            editor.txt.html(articleData.articleText);
-        }
+            if (result.data.list.length === 0 && page > 1) {
+                to_page(page - 1);
+                return;
+            }
+            build_article_table(result.data.list);
+            build_page_info(result.data);
+            build_page_nav(result.data);
+        },
+        error: function (xhr) { requestFailure(xhr, '网络异常，文章列表加载失败，请重试'); }
     });
 }
 
-$("#articleManager").click(function () {
-    updateArticleFlag=false;
-    updateArticleId=0;
+function build_article_table(articles) {
+    var body = $('#tbRecord tbody').empty();
+    $('#check_all').prop('checked', false);
+    if (!articles.length) {
+        $('<tr>').append($('<td>').attr('colspan', 11).text('暂无文章，点击“写博客”开始创作')).appendTo(body);
+    }
+    $.each(articles, function (index, item) {
+        var checkbox = $('<input>').attr('type', 'checkbox').addClass('check_item').val(item.articleId);
+        var row = $('<tr>').append($('<td>').append(checkbox));
+        $.each([item.articleTitle, item.articleTag, statusName(item.articleStatus), item.articlePageviews,
+            item.articleLikecount, item.articleComment, item.articleHeat, formatArticleDate(item.created),
+            formatArticleDate(item.updated)], function (i, value) { row.append($('<td>').text(value)); });
+        var actions = $('<td>');
+        $('<button>').attr('type', 'button').addClass('btn btn-primary btn-sm edit_btn')
+            .attr('data-id', item.articleId).text('编辑').appendTo(actions);
+        if (item.articleStatus === 'PUBLISHED') {
+            actions.append(' ');
+            $('<button>').attr('type', 'button').addClass('btn btn-warning btn-sm offline_btn')
+                .attr('data-id', item.articleId).text('下架').appendTo(actions);
+        }
+        actions.append(' ');
+        $('<button>').attr('type', 'button').addClass('btn btn-danger btn-sm delete_btn')
+            .attr('data-id', item.articleId).text('删除').appendTo(actions);
+        row.append(actions).appendTo(body);
+    });
+}
+
+function build_page_info(page) {
+    currentPage = page.pageNum || 1;
+    $('#page_info_area').text('当前' + currentPage + '页，共有' + page.pages + '页，共有' + page.total + '条记录');
+}
+
+function build_page_nav(page) {
+    var ul = $('<ul>').addClass('pagination');
+    function addLink(label, target, enabled, active) {
+        var li = $('<li>').toggleClass('disabled', !enabled).toggleClass('active', !!active);
+        var link = $('<a>').attr('href', '#').text(label).appendTo(li);
+        link.on('click', function (event) {
+            event.preventDefault();
+            if (enabled) to_page(target);
+        });
+        ul.append(li);
+    }
+    if (page.pages > 0) {
+        addLink('首页', 1, page.hasPreviousPage);
+        addLink('«', page.pageNum - 1, page.hasPreviousPage);
+        $.each(page.navigatepageNums, function (i, number) { addLink(number, number, true, number === page.pageNum); });
+        addLink('»', page.pageNum + 1, page.hasNextPage);
+        addLink('末页', page.pages, page.hasNextPage);
+    }
+    $('#page_nav_area').empty().append(ul);
+}
+
+function deleteArticles(ids) {
+    $.ajax({
+        url: articleAdminUrls.deleteUrl + ids.join('-'),
+        type: 'POST', dataType: 'json', headers: articleCsrfHeaders(),
+        success: function (result) {
+            if (!result || result.status !== 200) {
+                showAdminMessage(result && result.msg ? result.msg : '删除失败', true);
+                return;
+            }
+            showAdminMessage('文章已删除', false);
+            to_page(currentPage);
+        },
+        error: function (xhr) { requestFailure(xhr, '网络异常，删除失败，请重试'); }
+    });
+}
+
+$(document).on('click', '.delete_btn', function () {
+    if (articleSaveInProgress || articleLoadInProgress) return;
+    var title = $(this).closest('tr').find('td').eq(1).text();
+    if (confirm('确定删除【' + title + '】？此操作无法撤销。')) deleteArticles([$(this).attr('data-id')]);
+});
+
+$(document).on('click', '.offline_btn', function () {
+    if (articleSaveInProgress || articleLoadInProgress) return;
+    var id = $(this).attr('data-id');
+    if (!confirm('确定下架这篇文章？下架后访客将无法阅读。')) return;
+    $.ajax({
+        url: articleAdminUrls.statusUrl + id,
+        type: 'POST', dataType: 'json', headers: articleCsrfHeaders(), data: {articleStatus: 'OFFLINE'},
+        success: function (result) {
+            if (!result || result.status !== 200) {
+                showAdminMessage(result && result.msg ? result.msg : '下架失败', true);
+                return;
+            }
+            if (String(updateArticleId) === id) {
+                currentArticleStatus = 'OFFLINE';
+                $('#articleStatusLabel').text(statusName(currentArticleStatus));
+            }
+            showAdminMessage('文章已下架，可以编辑后重新发布', false);
+            to_page(currentPage);
+        },
+        error: function (xhr) { requestFailure(xhr, '网络异常，下架失败，请重试'); }
+    });
+});
+
+$('#check_all').on('click', function () { $('.check_item').prop('checked', this.checked); });
+$(document).on('click', '.check_item', function () {
+    $('#check_all').prop('checked', $('.check_item').length === $('.check_item:checked').length);
+});
+$('#emp_delete_all_btn').on('click', function () {
+    if (articleSaveInProgress || articleLoadInProgress) return;
+    var ids = $('.check_item:checked').map(function () { return this.value; }).get();
+    if (!ids.length) {
+        showAdminMessage('请先选择要删除的文章', true);
+        return;
+    }
+    if (confirm('确定删除选中的 ' + ids.length + ' 篇文章？此操作无法撤销。')) deleteArticles(ids);
+});
+
+$(document).on('click', '.edit_btn', function () {
+    if (articleSaveInProgress || articleLoadInProgress) return;
+    if (articleHasChanges() && !confirm('当前编辑内容尚未保存，确定打开另一篇文章？')) return;
+    var id = $(this).attr('data-id');
+    articleLoadInProgress = true;
+    showAdminMessage('正在加载文章，请稍候…', false);
+    $('#saveDraftBtn, #submitBtn, #newArticleBtn').prop('disabled', true);
+    $.ajax({
+        url: articleAdminUrls.detailUrl + id, type: 'GET', dataType: 'json',
+        success: function (result) {
+            if (!result || result.status !== 200 || !result.data) {
+                showAdminMessage(result && result.msg ? result.msg : '文章加载失败', true);
+                return;
+            }
+            var article = result.data;
+            updateArticleFlag = true;
+            updateArticleId = article.articleId;
+            currentArticleStatus = article.articleStatus;
+            $('#articleTitle').val(article.articleTitle);
+            $('#articleTag').val(article.articleTag);
+            editor.txt.html(article.articleText || '');
+            $('#articleStatusLabel').text(statusName(currentArticleStatus));
+            $('#articlePreview').hide();
+            savedArticleSnapshot = articleSnapshot();
+            showArticleEditor();
+            $('#admin-message, #editor-message').hide();
+        },
+        error: function (xhr) { requestFailure(xhr, '网络异常，文章加载失败，当前编辑内容已保留'); },
+        complete: function () {
+            articleLoadInProgress = false;
+            $('#saveDraftBtn, #submitBtn, #newArticleBtn').prop('disabled', false);
+        }
+    });
+});
+
+$('#writeBlog').on('click', function () { if (!articleLoadInProgress) showArticleEditor(); });
+$('#articleManager').on('click', function () {
+    $('#writeBlog').removeClass('on');
+    $('#articleManager').addClass('on');
+    $('#articleAttributes').show();
+    $('#articleEdit').hide();
+});
+$('#newArticleBtn').on('click', function () {
+    if (articleSaveInProgress || articleLoadInProgress) return;
+    if (articleHasChanges() && !confirm('当前编辑内容尚未保存，确定新建文章？')) return;
+    updateArticleFlag = false;
+    updateArticleId = 0;
+    currentArticleStatus = 'DRAFT';
     $('#form')[0].reset();
     editor.txt.clear();
-    $("#writeBlog").removeClass("on");
-    $("#articleManager").addClass("on");
-    $("#articleAttributes").css("display","block");
-    $("#articleEdit").css("display","none");
+    $('#articleStatusLabel').text('新草稿');
+    $('#articlePreview').hide();
+    savedArticleSnapshot = articleSnapshot();
 });
 
+function formatArticleDate(value) {
+    if (!value) return '—';
+    var date = new Date(value);
+    if (isNaN(date.getTime())) return '—';
+    function pad(number) { return number < 10 ? '0' + number : String(number); }
+    return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate()) + ' '
+        + pad(date.getHours()) + ':' + pad(date.getMinutes()) + ':' + pad(date.getSeconds());
+}
 
-function Format(now,mask)
-{
-    var d = new Date(now);
-    var zeroize = function (value, length)
-    {
-        if (!length) length = 2;
-        value = String(value);
-        for (var i = 0, zeros = ''; i < (length - value.length); i++)
-        {
-            zeros += '0';
-        }
-        return zeros + value;
-    };
-
-    return mask.replace(/"[^"]*"|'[^']*'|\b(?:d{1,4}|m{1,4}|yy(?:yy)?|([hHMstT])\1?|[lLZ])\b/g, function ($0)
-    {
-        switch ($0)
-        {
-            case 'd': return d.getDate();
-            case 'dd': return zeroize(d.getDate());
-            case 'ddd': return ['Sun', 'Mon', 'Tue', 'Wed', 'Thr', 'Fri', 'Sat'][d.getDay()];
-            case 'dddd': return ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][d.getDay()];
-            case 'M': return d.getMonth() + 1;
-            case 'MM': return zeroize(d.getMonth() + 1);
-            case 'MMM': return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getMonth()];
-            case 'MMMM': return ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][d.getMonth()];
-            case 'yy': return String(d.getFullYear()).substr(2);
-            case 'yyyy': return d.getFullYear();
-            case 'h': return d.getHours() % 12 || 12;
-            case 'hh': return zeroize(d.getHours() % 12 || 12);
-            case 'H': return d.getHours();
-            case 'HH': return zeroize(d.getHours());
-            case 'm': return d.getMinutes();
-            case 'mm': return zeroize(d.getMinutes());
-            case 's': return d.getSeconds();
-            case 'ss': return zeroize(d.getSeconds());
-            case 'l': return zeroize(d.getMilliseconds(), 3);
-            case 'L': var m = d.getMilliseconds();
-                if (m > 99) m = Math.round(m / 10);
-                return zeroize(m);
-            case 'tt': return d.getHours() < 12 ? 'am' : 'pm';
-            case 'TT': return d.getHours() < 12 ? 'AM' : 'PM';
-            case 'Z': return d.toUTCString().match(/[A-Z]+$/);
-            // Return quoted strings with the surrounding quotes removed
-            default: return $0.substr(1, $0.length - 2);
-        }
-    });
-};
-
-
-$(function () {
-    $(".tabs").slide({trigger: "click"});
+$(function () { to_page(1); });
+window.addEventListener('beforeunload', function (event) {
+    if (articleHasChanges()) { event.preventDefault(); event.returnValue = ''; }
 });

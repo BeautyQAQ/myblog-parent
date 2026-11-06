@@ -2,6 +2,7 @@
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 	<head>
 		<meta charset="utf-8" />
+        <meta name="csrf-token" th:content="${csrfToken}" />
 		<title>文章管理</title>
 		<link href="/css/Site.css" th:href="@{/css/Site.css}" rel="stylesheet" type="text/css" />
 		<link href="/css/layout.css" th:href="@{/css/layout.css}" rel="stylesheet" />
@@ -211,8 +212,15 @@
 		<div class="dvheader">
 			<div class="dvheadertools">
 				<span class="headerspantitle">文章管理系统</span>
-				<ul class="headerultools">
-				</ul>
+                <ul class="headerultools">
+                    <li th:if="${currentUser != null}" style="color: white; padding: 12px;">
+                        <span th:text="${currentUser.username}">管理员</span>
+                        <form id="manager-logout-form" th:action="@{/auth/logout}" method="post" style="display: inline;">
+                            <button type="submit">退出登录</button>
+                        </form>
+                        <span id="logout-message" role="status" aria-live="polite"></span>
+                    </li>
+                </ul>
 			</div>
 		</div>
 		<div class="dvcontent">
@@ -234,5 +242,32 @@
 		<script src="/js/plugs/Jqueryplugs.js" th:src="@{/js/plugs/Jqueryplugs.js}" type="text/javascript"></script>
 		<script src="/js/_layout.js" th:src="@{/js/_layout.js}"></script>
 
-	</body>
+        <script>
+            (function () {
+                var form = document.getElementById('manager-logout-form');
+                if (!form) return;
+                form.addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    var button = form.querySelector('button');
+                    var message = document.getElementById('logout-message');
+                    button.disabled = true;
+                    $.ajax({
+                        url: form.action,
+                        type: 'POST',
+                        dataType: 'json',
+                        headers: {'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content},
+                        success: function (result) {
+                            if (result && result.status === 200) {
+                                window.location.reload();
+                            } else {
+                                message.textContent = result && result.msg ? result.msg : '退出失败，请重试';
+                            }
+                        },
+                        error: function () { message.textContent = '退出失败，请稍后重试'; },
+                        complete: function () { button.disabled = false; }
+                    });
+                });
+            }());
+        </script>
+    </body>
 </html>
