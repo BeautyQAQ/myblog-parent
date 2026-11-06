@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('NewStarBlog')}"></head>
+<body id="top">
+<nav th:replace="~{fragments/layout :: navigation}"></nav>
+<main class="container blog-content-container">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="alert alert-info" th:if="${#lists.isEmpty(articleList)}">暂无文章</div>
+            <article class="card mb-4" th:each="item : ${articleList}">
+                <div class="card-block">
+                    <h2 class="card-title">
+                        <img th:src="@{/resources/images/avatar-defualt.jpg}" class="blog-avatar-50" alt="作者头像">
+                        <a th:href="@{/blogs(articleId=${item.articleId})}" class="card-link" th:text="${item.articleTitle}">文章标题</a>
+                    </h2>
+                    <div class="card-text" th:utext="${item.articleText}">文章摘要</div>
+                    <p class="card-text">
+                        <span>管理员</span>
+                        <span th:text="${'发表于 ' + #dates.format(item.updated, 'yyyy-MM-dd HH:mm:ss')}">发布时间</span>
+                        <i class="fa fa-eye" aria-label="浏览量" th:text="${item.articlePageviews}"></i>
+                        <i class="fa fa-heart-o" aria-label="点赞数" th:text="${item.articleLikecount}"></i>
+                        <i class="fa fa-comment-o" aria-label="评论数" th:text="${item.articleComment}"></i>
+                    </p>
+                </div>
+            </article>
+            <nav th:if="${pages > 0}" aria-label="文章分页">
+                <ul class="pagination">
+                    <li class="page-item" th:classappend="${!hasPreviousPage} ? 'disabled'">
+                        <a th:if="${hasPreviousPage}" class="page-link" th:href="@{/(pageNum=1,pageSize=${pageSize},orderBy=${orderBy})}">首页</a>
+                        <span th:unless="${hasPreviousPage}" class="page-link">首页</span>
+                    </li>
+                    <li class="page-item" th:classappend="${!hasPreviousPage} ? 'disabled'">
+                        <a th:if="${hasPreviousPage}" class="page-link" aria-label="上一页" th:href="@{/(pageNum=${pageNum - 1},pageSize=${pageSize},orderBy=${orderBy})}">&laquo;</a>
+                        <span th:unless="${hasPreviousPage}" class="page-link" aria-label="上一页">&laquo;</span>
+                    </li>
+                    <li th:each="number : ${navigatepageNums}" class="page-item" th:classappend="${number == pageNum} ? 'active'">
+                        <a class="page-link" th:href="@{/(pageNum=${number},pageSize=${pageSize},orderBy=${orderBy})}" th:text="${number}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${!hasNextPage} ? 'disabled'">
+                        <a th:if="${hasNextPage}" class="page-link" aria-label="下一页" th:href="@{/(pageNum=${pageNum + 1},pageSize=${pageSize},orderBy=${orderBy})}">&raquo;</a>
+                        <span th:unless="${hasNextPage}" class="page-link" aria-label="下一页">&raquo;</span>
+                    </li>
+                    <li class="page-item" th:classappend="${!hasNextPage} ? 'disabled'">
+                        <a th:if="${hasNextPage}" class="page-link" th:href="@{/(pageNum=${pages},pageSize=${pageSize},orderBy=${orderBy})}">末页</a>
+                        <span th:unless="${hasNextPage}" class="page-link">末页</span>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</main>
+<th:block th:replace="~{fragments/layout :: footer}"></th:block>
+</body>
+</html>

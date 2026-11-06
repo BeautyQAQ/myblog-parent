@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(pageTitle)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title th:text="${pageTitle} + ' · NewStarBlog'">NewStarBlog</title>
+    <link rel="stylesheet" th:href="@{/css/tether.min.css}">
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}">
+    <link rel="stylesheet" th:href="@{/css/nprogress.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/blog.css}">
+</head>
+<body>
+<nav th:fragment="navigation" class="navbar navbar-inverse bg-inverse navbar-toggleable-md" id="top">
+    <div class="container">
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+                data-target="#navbarsContainer" aria-controls="navbarsContainer" aria-expanded="false"
+                aria-label="展开导航">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <a class="navbar-brand" th:href="${portalBaseUrl + '/'}">NewStarBlog</a>
+        <div class="collapse navbar-collapse" id="navbarsContainer">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item"><a class="nav-link" th:href="${portalBaseUrl + '/'}">最新</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="${portalBaseUrl + '/?orderBy=heat'}">最热</a></li>
+            </ul>
+            <div>
+                <a class="btn btn-outline-success my-2 my-sm-0" th:href="@{/page/login}">登录</a>
+                <a class="btn btn-outline-success my-2 my-sm-0" th:href="@{/page/register}">注册</a>
+            </div>
+        </div>
+    </div>
+</nav>
+</body>
+</html>

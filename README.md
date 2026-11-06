@@ -9,17 +9,19 @@
 
 项目将 Web 页面与业务服务拆成独立工程。后台提供文章管理，前台展示文章列表和详情，SSO 工程包含注册、登录与 token 查询。评论、点赞、浏览量和热度等功能仍属于后续完善方向。
 
-main 保留 Spring MVC、MyBatis、JSP 和 Dubbo 独立服务：MySQL 存储业务数据，Redis 提供文章缓存和登录会话，Kafka 传递文章变更后的缓存失效事件。图片以 MEDIUMBLOB 保存在 MySQL，通过 manager-web 的 /images/{id} 接口读取。Dubbo 改用可配置地址直连，移除应用对 ZooKeeper 和 ActiveMQ 的依赖。
+main 使用 Spring MVC、Thymeleaf、MyBatis 和 Dubbo 独立服务。门户、后台与登录注册页面由 Java 服务端渲染，模板与静态资源随 WAR 部署，无需独立前端工程或 Node.js 运行环境。MySQL 存储业务数据，Redis 提供文章缓存和登录会话，Kafka 传递文章变更后的缓存失效事件。图片以 MEDIUMBLOB 保存在 MySQL，通过 manager-web 的 /images/{id} 接口读取。Dubbo 使用可配置地址直连，应用不依赖 ZooKeeper 或 ActiveMQ。
 
 ## 升级基线与进度
 
 本轮已实现 JDK 21、Spring Framework 7、MyBatis 3.6 / MyBatis-Spring 4.1、Dubbo 3.3 和 Jakarta EE 11 对应 API 的升级基线。开发环境通过 Jetty 12.1 启动，生产部署目标为 Tomcat 11 WAR。依赖的确切版本以根目录 [pom.xml](pom.xml) 为准。
 
+页面层已迁为 Thymeleaf 3.1.5，三个 Web 模块的模板统一位于 src/main/webapp/WEB-INF/templates/。Controller 继续通过 Model 传递页面数据，文章管理、上传和登录注册保留原有 AJAX 接口。16 个模块 clean install 与 40 项测试全部通过，并完成六个 WAR 的真实启动、页面与 Chrome 文章操作检查。模板配置和验证边界见 [Thymeleaf 页面说明](docs/thymeleaf.md)。
+
 MySQL 和 Redis 连接信息通过 DBX 的 nas-mysql、nas-redis 获取，Kafka 连接也通过 DBX 检查。**DBX 用于查验连接与辅助测试；Java 应用运行时直接通过 JDBC、Jedis 和 Kafka 客户端访问对应服务。**
 
 DBX 已确认 nas-mysql 为 MySQL 8.1.0，nas-redis 为 Redis 8.6.2 单机。独立 myblog 库及四张表已初始化，未导入旧演示数据，未修改其他业务库。按项目约定，当前组网环境的连接地址、账号和密码统一保存在 myblog-common/src/main/resources/myblog-defaults.properties，随仓库管理。
 
-本轮 16 个 Maven 模块 clean install 成功，29 个测试零失败；六个 WAR 真实启动，15 项 HTTP 检查全部通过，覆盖 JSP、分页列表、SSO 缺失 token 查询、图片上传与读取、文章新增和删除后的 Kafka 缓存失效。RPC 分页响应使用标准 Map / ArrayList，保留原 JSON 结构并维持 Dubbo STRICT 检查。完整注册登录与 Cookie 流程、Tomcat 11 生产部署和历史图片迁移尚未覆盖，详见 [JDK 21 升级说明](docs/upgrade-jdk21.md)。
+此前的 JDK 21 升级已完成 16 个 Maven 模块 clean install、29 个测试及六个 WAR 的 15 项真实 HTTP 检查，覆盖当时的 JSP、分页列表、SSO 缺失 token 查询、图片上传与读取、文章新增和删除后的 Kafka 缓存失效。RPC 分页响应使用标准 Map / ArrayList，保留原 JSON 结构并维持 Dubbo STRICT 检查。当前 Thymeleaf 迁移的验证记录见 [Thymeleaf 页面说明](docs/thymeleaf.md)；JDK 基线与部署边界见 [JDK 21 升级说明](docs/upgrade-jdk21.md)。
 
 ## 本地构建与启动
 
@@ -68,9 +70,12 @@ jetty:run 持续占用当前终端，按 Ctrl+C 停止。Jetty 插件只在 WAR 
 
 生产环境将构建生成的 WAR 部署到 Tomcat 11，配置实际域名、上下文路径、RPC 直连地址和数据库连接。图片由应用提供读取接口，无需单独部署图片目录、对象存储或 Nginx 图片服务器。Jetty Maven 插件用于开发启动。
 
+跨应用页面跳转使用 portal.public-base-url 与 sso.public-base-url，默认分别为 http://localhost:8082 和 http://localhost:8086。部署到其他域名或上下文路径时，连同 image.public-base-url 一并覆盖。
+
 ## 官方参考
 
 - [Spring Framework 7](https://docs.spring.io/spring-framework/reference/overview.html)
+- [Thymeleaf 与 Spring MVC](https://www.thymeleaf.org/doc/tutorials/3.1/thymeleafspring.html)
 - [Jakarta EE 11](https://jakarta.ee/specifications/platform/11/)
 - [Apache Dubbo 3.3.6](https://github.com/apache/dubbo/blob/dubbo-3.3.6/README.md) 与 [直连配置](https://dubbo.apache.org/en/overview/mannual/java-sdk/tasks/framework/more/explicit-target/)
 - [Jetty 12.1 Maven 插件](https://jetty.org/docs/jetty/12.1/programming-guide/maven-jetty/jetty-maven-plugin.html)

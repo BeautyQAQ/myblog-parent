@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('注册')}"></head>
+<body>
+<nav th:replace="~{fragments/header :: navigation}"></nav>
+<main class="container blog-content-container">
+    <form id="registerForm" class="auth-form" method="post" th:action="@{/user/register}"
+          th:attr="data-success-url=@{/page/login}" data-error-message="注册失败，请稍后重试">
+        <h2 class="form-signin-heading">注册</h2>
+        <div class="form-group col-md-5">
+            <label for="username" class="col-form-label">用户名</label>
+            <input type="text" class="form-control" id="username" name="username" maxlength="50"
+                   autocomplete="username" placeholder="请输入账号，至少3个字符，至多20个" required>
+        </div>
+        <div class="form-group col-md-5">
+            <label for="email" class="col-form-label">邮箱</label>
+            <input type="email" class="form-control" id="email" name="email" maxlength="50"
+                   autocomplete="email" placeholder="请输入邮箱">
+        </div>
+        <div class="form-group col-md-5">
+            <label for="phone" class="col-form-label">电话</label>
+            <input type="tel" class="form-control" id="phone" name="phone" maxlength="20"
+                   autocomplete="tel" placeholder="请输入电话">
+        </div>
+        <div class="form-group col-md-5">
+            <label for="password" class="col-form-label">密码</label>
+            <input type="password" class="form-control" id="password" name="password" maxlength="30"
+                   autocomplete="new-password" placeholder="请输入密码，字母或特殊符号和数字结合" required>
+        </div>
+        <div class="form-group col-md-5">
+            <a th:href="@{/page/login}">已有账号，去登录</a>
+        </div>
+        <div class="form-group col-md-5">
+            <button id="registerBtn" class="btn btn-primary" type="submit">提交</button>
+        </div>
+        <div class="col-md-5">
+            <p id="errorText" class="blog-label-error" role="alert" aria-live="polite"></p>
+        </div>
+    </form>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<th:block th:replace="~{fragments/footer :: scripts}"></th:block>
+</body>
+</html>

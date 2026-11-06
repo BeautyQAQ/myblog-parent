@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<body>
+<footer th:fragment="footer" class="blog-footer bg-inverse">
+    <a id="goToTop" href="#top" aria-label="返回顶部"><b class="back-to-top" style="font-size: 25px">↑</b></a>
+    <div class="container">
+        <p class="m-0 text-center text-white">© 2018 <a th:href="${portalBaseUrl + '/'}">myBlog</a></p>
+    </div>
+</footer>
+<th:block th:fragment="scripts">
+    <script th:src="@{/js/jquery-3.1.1.min.js}"></script>
+    <script th:src="@{/js/tether.min.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+    <script th:src="@{/js/nprogress.js}"></script>
+    <script th:src="@{/js/main.js}"></script>
+    <script th:src="@{/js/my.js}"></script>
+    <script th:src="@{/js/auth.js}"></script>
+</th:block>
+</body>
+</html>

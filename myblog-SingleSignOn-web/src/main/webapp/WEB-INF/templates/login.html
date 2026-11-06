@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('登录')}"></head>
+<body>
+<nav th:replace="~{fragments/header :: navigation}"></nav>
+<main class="container blog-content-container">
+    <form id="loginForm" class="auth-form" method="post" th:action="@{/user/login}"
+          th:attr="data-success-url=${redirect}" data-error-message="账号或密码错误">
+        <h2>请登录</h2>
+        <div class="form-group col-md-5">
+            <label for="username" class="col-form-label">账号</label>
+            <input type="text" class="form-control" id="username" name="username" maxlength="50"
+                   autocomplete="username" placeholder="请输入账号" required>
+        </div>
+        <div class="form-group col-md-5">
+            <label for="password" class="col-form-label">密码</label>
+            <input type="password" class="form-control" id="password" name="password" maxlength="30"
+                   autocomplete="current-password" placeholder="请输入密码" required>
+        </div>
+        <div class="form-group col-md-5">
+            <a th:href="@{/page/register}">还没有账号，去注册</a>
+        </div>
+        <div class="form-group col-md-5">
+            <button id="loginBtn" class="btn btn-primary" type="submit">登录</button>
+        </div>
+        <div class="col-md-5">
+            <p id="errorText" class="blog-label-error" role="alert" aria-live="polite"></p>
+        </div>
+    </form>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<th:block th:replace="~{fragments/footer :: scripts}"></th:block>
+</body>
+</html>

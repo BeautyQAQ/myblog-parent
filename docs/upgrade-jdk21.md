@@ -8,9 +8,10 @@ university 保留原 master 的 be53508 快照；main 为默认分支，升级�
 | --- | --- | --- |
 | Java | JDK 21 | 编译、Maven 和应用运行使用同一 JDK |
 | Web / IoC / 事务 | Spring Framework 7.0.10 | 保留 Spring MVC 与 XML 配置 |
+| 页面模板 | Thymeleaf 3.1.5.RELEASE | 三个 Web 模块使用服务端渲染；接入 thymeleaf-spring6 |
 | 数据访问 | MyBatis 3.6、MyBatis-Spring 4.1 | 保留现有 Mapper 和数据模型 |
 | RPC | Apache Dubbo 3.3.6 | 可配置直连；Spring 7 组合真实 TCP 冒烟已通过 |
-| Jakarta API | Jakarta EE 11 对应 API | Servlet、JSP、JSTL 使用 Jakarta 命名空间 |
+| Jakarta API | Jakarta EE 11 对应 API | Servlet 6.1 使用 Jakarta 命名空间；页面已移除 JSP/JSTL 依赖 |
 | 开发容器 | Jetty 12.1.14，EE11 Maven 插件 | 只在六个 WAR 模块启用 |
 | 生产容器 | Tomcat 11 部署目标 | WAR 已打包；生产容器部署尚未验证 |
 | 数据库 | MySQL 8.x，现有实例 8.1.0 | 通过 DBX 的 nas-mysql 查验 |
@@ -20,7 +21,7 @@ university 保留原 master 的 be53508 快照；main 为默认分支，升级�
 
 上述版本为本轮已实现的升级基线，实际依赖坐标和补丁版本以根目录 pom.xml 为准。本机 JDK 21 到 MySQL、Redis 与 Kafka 的运行时连通已验证；16 个 Maven 模块 clean install 成功，29 个测试零失败，六个 WAR 真实启动后的 15 项 HTTP 检查全部通过。Tomcat 11 生产部署尚未验证。
 
-Spring 7 采用 Jakarta EE 11 对应 API，Tomcat 11 提供 Servlet 6.1 / JSP 4.0 实现。迁移涉及 javax.servlet 等 Jakarta API；javax.sql 属于 Java SE，无需迁移命名空间。官方依据见文末链接。
+Spring 7 采用 Jakarta EE 11 对应 API，应用使用 Servlet 6.1，由 Thymeleaf 渲染 HTML。迁移涉及 javax.servlet 等 Jakarta API；javax.sql 属于 Java SE，无需迁移命名空间。后续页面迁移说明与验证记录见 [Thymeleaf 页面说明](thymeleaf.md)。官方依据见文末链接。
 
 ### Dubbo 分页响应兼容
 
@@ -70,6 +71,8 @@ export MYBLOG_CONFIG_LOCATION="file:$PWD/myblog-local.properties"
 | portal RPC | dubbo.portal.url、dubbo.portal.port、dubbo.host | portal-web 直连 portal-service |
 | SSO RPC | dubbo.sso.url、dubbo.sso.port、dubbo.host | SSO-web 直连 SSO-service |
 | 图片读取 | image.public-base-url | 开发值为 http://localhost:8084，拼接 /images/{id} 供浏览器读取 |
+| 门户入口 | portal.public-base-url | 开发值为 http://localhost:8082，SSO 导航与登录默认回跳使用，可包含上下文路径 |
+| 登录入口 | sso.public-base-url | 开发值为 http://localhost:8086，门户的登录与注册链接使用，可包含上下文路径 |
 
 模块仍通过各自的 Spring XML 消费配置：
 
@@ -116,7 +119,7 @@ Kafka 事件用于文章变更后的缓存失效。生产与消费统一使用 m
 
 保存接近上限的图片时，MySQL 服务端和客户端允许的包大小需容纳图片与 SQL 开销；建议 max_allowed_packet 至少为 8 MiB。超过限制会导致写入失败或连接关闭，参见 [MySQL 包大小说明](https://dev.mysql.com/doc/refman/8.4/en/packet-too-large.html)。
 
-前端保留了一些本地页面跳转与编辑器上传地址。部署时检查三套 Web 工程的 JSP、js/userspace/main.js 和 js/userspace/blogedit.js，统一为实际入口。
+页面模板位于三个 Web 模块的 WEB-INF/templates，站内链接使用 Thymeleaf 的上下文路径处理；跨应用跳转使用 portal.public-base-url 和 sso.public-base-url。图片读取地址使用 image.public-base-url。部署时按实际域名及上下文路径覆盖这些配置。
 
 ## 开发构建与启动
 
@@ -157,7 +160,7 @@ jetty:run 持续占用终端，使用 Ctrl+C 停止。Jetty EE11 插件只在 WA
 
 ## 验证范围
 
-本轮已完成：
+JDK 21 升级阶段已完成（迁移 Thymeleaf 前的记录；当前页面验证见 [Thymeleaf 页面说明](thymeleaf.md)）：
 
 - JDK 21 下 16 个 Maven 模块 clean install 成功，29 个测试零失败。
 - 六个 WAR 真实启动，15 项 HTTP 检查全部通过；四个 JSP 页面返回 HTTP 200。

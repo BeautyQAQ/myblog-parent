@@ -51,3 +51,10 @@
         height: 24px;
         line-height: 24px;
     }
+
+    /* Article tables and editor forms determine their own pane height. */
+    .tabs > .bd > #articleAttributes,
+    .tabs > .bd > #articleEdit {
+        height: auto;
+        line-height: inherit;
+    }

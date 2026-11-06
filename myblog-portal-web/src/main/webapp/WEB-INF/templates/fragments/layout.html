@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title th:text="${title}">NewStarBlog</title>
+    <link rel="icon" th:href="@{/resources/favicon.ico}">
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/font-awesome.min.css}">
+    <link rel="stylesheet" th:href="@{/css/nprogress.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/blog.css}">
+</head>
+<body>
+<nav th:fragment="navigation" class="navbar navbar-inverse bg-inverse navbar-toggleable-md">
+    <div class="container">
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+                data-target="#navbarsContainer" aria-controls="navbarsContainer" aria-expanded="false"
+                aria-label="展开导航">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <a class="navbar-brand" th:href="@{/}">NewStarBlog</a>
+        <div class="collapse navbar-collapse" id="navbarsContainer">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item"><a class="nav-link" th:href="@{/(orderBy='new')}">最新</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/(orderBy='heat')}">最热</a></li>
+            </ul>
+            <a th:href="${ssoPublicBaseUrl + '/page/login'}" class="btn btn-outline-success my-2 my-sm-0">登录</a>
+            <a th:href="${ssoPublicBaseUrl + '/page/register'}" class="btn btn-outline-success my-2 my-sm-0 ml-2">注册</a>
+        </div>
+    </div>
+</nav>
+<th:block th:fragment="footer">
+    <footer class="blog-footer bg-inverse">
+        <a id="goToTop" href="#top" aria-label="返回顶部"><b class="back-to-top" aria-hidden="true">↑</b></a>
+        <div class="container"><p class="m-0 text-center text-white">© 2018 NewStarBlog</p></div>
+    </footer>
+    <script th:src="@{/js/jquery-3.1.1.min.js}"></script>
+    <script th:src="@{/js/tether.min.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+    <script th:src="@{/js/nprogress.js}"></script>
+    <script th:src="@{/js/main.js}"></script>
+    <script th:src="@{/js/my.js}"></script>
+</th:block>
+</body>
+</html>

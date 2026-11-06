@@ -4,8 +4,10 @@ import com.myblog.portal.pojo.ArticleResult;
 import com.myblog.pojo.TbArticle;
 import com.myblog.portal.service.ArticlePageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -17,6 +19,14 @@ public class PortalArticleController {
 
     @Autowired
     private ArticlePageService articlePageService;
+
+    @Value("${sso.public-base-url:http://localhost:8086}")
+    private String ssoPublicBaseUrl;
+
+    @ModelAttribute("ssoPublicBaseUrl")
+    public String ssoPublicBaseUrl() {
+        return ssoPublicBaseUrl.replaceAll("/+$", "");
+    }
 
     @RequestMapping("/blogs")
     public String getArticleWithText(@RequestParam("articleId") Integer articleId,Model model){
@@ -50,6 +60,8 @@ public class PortalArticleController {
         model.addAttribute("pageNum",portalArticleListPage.getPageNum());
         model.addAttribute("navigatepageNums",portalArticleListPage.getNavigatepageNums());
         model.addAttribute("articleList",articleList1);
+        model.addAttribute("pageSize",pageSize);
+        model.addAttribute("orderBy",orderBy);
         return "index";
     }
 }

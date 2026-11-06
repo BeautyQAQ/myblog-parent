@@ -23,7 +23,6 @@ var Config = {
                 $(".limenuitem").eq(j).css("border-left", "3px solid #2B7DBC");
                 $(".limenuitem").eq(j).children(".ulleftsubitems").eq(0).stop().animate({ "height": "show" });
                 $(".limenuitem").eq(j).children(".ulleftsubitems").eq(0).children("li").eq(k).css("color", "#2B7DBC");
-                $(".limenuitem").eq(j).children(".ulleftsubitems").eq(0).children("li").eq(k).css("background-image", "url('/content/resources/images/menuarrow.jpg')");
                 return
             }
         }

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${articleWithText.articleTitle})}"></head>
+<body id="top">
+<nav th:replace="~{fragments/layout :: navigation}"></nav>
+<main class="container blog-content-container">
+    <div class="row">
+        <div class="col-md-8">
+            <article class="card mb-4">
+                <header class="card-block">
+                    <h1 class="card-title">
+                        <img th:src="@{/resources/images/avatar-defualt.jpg}" class="blog-avatar-50" alt="作者头像">
+                        <span th:text="${articleWithText.articleTitle}">文章标题</span>
+                    </h1>
+                    <p class="card-text">
+                        <span>管理员</span>
+                        <span th:text="${'发表于 ' + #dates.format(articleWithText.updated, 'yyyy-MM-dd HH:mm:ss')}">发布时间</span>
+                        <i class="fa fa-eye" aria-label="浏览量" th:text="${articleWithText.articlePageviews}"></i>
+                        <i class="fa fa-heart-o" aria-label="点赞数" th:text="${articleWithText.articleLikecount}"></i>
+                        <i class="fa fa-comment-o" aria-label="评论数" th:text="${articleWithText.articleComment}"></i>
+                    </p>
+                    <p class="card-text">标签：<span class="badge badge-default" th:text="${articleWithText.articleTag}">标签</span></p>
+                </header>
+                <div class="card-block post-content" th:utext="${articleWithText.articleText}">文章内容</div>
+            </article>
+        </div>
+    </div>
+</main>
+<th:block th:replace="~{fragments/layout :: footer}"></th:block>
+</body>
+</html>

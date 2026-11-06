@@ -20,10 +20,12 @@ public class LoginController {
     private LoginService loginService;
     @Value("${TOKEN_KEY}")
     private String TOKEN_KEY;
+    @Value("${portal.public-base-url:http://localhost:8082}")
+    private String portalBaseUrl;
 
     @RequestMapping("/page/login")
     public String showLogin(String redirect, Model model) {
-        model.addAttribute("redirect", redirect);
+        model.addAttribute("redirect", SsoPageModel.loginDestination(portalBaseUrl, redirect));
         return "login";
     }
 

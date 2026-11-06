@@ -32,7 +32,7 @@ editor.customConfig.pasteTextHandle = function (content) {
 }
 //上传图片保存到服务器
 editor.customConfig.uploadImgMaxSize = 5 * 1024 * 1024
-editor.customConfig.uploadImgServer = '/upload'
+editor.customConfig.uploadImgServer = articleAdminUrls.uploadUrl
 editor.customConfig.uploadFileName = 'picture'
 editor.customConfig.uploadImgHooks = {
     before: function (xhr, editor, files) {
@@ -93,7 +93,7 @@ $(document).ready(function(){
             $.ajax({
                 type:'POST',
                 datatype:'json',
-                url:"/article/add",
+                url:articleAdminUrls.addUrl,
                 data:articledata,
                 success:function(result){
                     if (result.status==200){
@@ -112,7 +112,7 @@ $(document).ready(function(){
                  $.ajax({
                      type:'POST',
                      datatype:'json',
-                     url:"/article/update",
+                     url:articleAdminUrls.updateUrl,
                      data:articledata,
                      success:function(result){
                          if (result.status==200){
