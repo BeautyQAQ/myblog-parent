@@ -1,5 +1,7 @@
 package com.myblog.service.impl;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.myblog.common.utils.Result;
@@ -8,43 +10,37 @@ import com.myblog.pojo.TbArticle;
 import com.myblog.pojo.TbArticleExample;
 import com.myblog.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.core.MessageCreator;
+import com.myblog.service.messaging.ArticleCacheInvalidationPublisher;
 import org.springframework.stereotype.Service;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashMap;
 
 @Service
 public class ArticleServiceImpl implements ArticleService {
+    private static final ObjectMapper RPC_RESPONSE_MAPPER = new ObjectMapper();
     @Autowired
     private TbArticleMapper tbArticleMapper;
     @Autowired
-    private JmsTemplate jmsTemplate;
-    @Autowired
-    private Destination queueDestination;
+    private ArticleCacheInvalidationPublisher cacheInvalidationPublisher;
 
     @Override
     public Result getArticleListPage(int pageNum, int pageSize, String orderBy) {
-        //引入pagehelper插件，
-        //设置分页信息
-        PageHelper.startPage(pageNum,pageSize);
-        //执行分页查询
-        //根据排序参数执行相应的分页查询
-        List<TbArticle> tbArticleList=new ArrayList<>();
-        if ("heat".equals(orderBy)){
-            tbArticleList=tbArticleMapper.selectAllOrderByHeat();
+        if (pageNum < 1 || pageSize < 1 || (!"heat".equals(orderBy) && !"new".equals(orderBy))) {
+            throw new IllegalArgumentException("Invalid article pagination");
         }
-        if ("new".equals(orderBy)){
-            tbArticleList=tbArticleMapper.selectAllOrderByNew();
+        PageHelper.startPage(pageNum, pageSize);
+        try {
+            List<TbArticle> articles = "heat".equals(orderBy)
+                    ? tbArticleMapper.selectAllOrderByHeat()
+                    : tbArticleMapper.selectAllOrderByNew();
+            PageInfo<TbArticle> page = new PageInfo<>(articles);
+            // Preserve the HTTP pagination fields without requiring PageHelper in the RPC consumer.
+            return Result.ok(RPC_RESPONSE_MAPPER.convertValue(page,
+                    new TypeReference<LinkedHashMap<String, Object>>() {}));
+        } finally {
+            PageHelper.clearPage();
         }
-        //使用pageinfo包装分页结果，返回分页结果
-        PageInfo<TbArticle> tbArticlePageInfo = new PageInfo<TbArticle>(tbArticleList);
-        return Result.ok(tbArticlePageInfo);
     }
 
     /**
@@ -55,13 +51,7 @@ public class ArticleServiceImpl implements ArticleService {
     public void deleteArticle(int articleId) {
         tbArticleMapper.deleteByPrimaryKey(articleId);
         //发消息更新缓存,清空缓存
-        jmsTemplate.send(queueDestination, new MessageCreator() {
-            @Override
-            public Message createMessage(Session session) throws JMSException {
-                System.out.println("已经发送消息");
-                return session.createTextMessage("delete_cache");
-            }
-        });
+        cacheInvalidationPublisher.publishAfterCommit();
     }
 
     /**
@@ -75,13 +65,7 @@ public class ArticleServiceImpl implements ArticleService {
         criteria.andArticleIdIn(articleIds);
         tbArticleMapper.deleteByExample(example);
         //发消息更新缓存,清空缓存
-        jmsTemplate.send(queueDestination, new MessageCreator() {
-            @Override
-            public Message createMessage(Session session) throws JMSException {
-                System.out.println("已经发送消息");
-                return session.createTextMessage("delete_cache");
-            }
-        });
+        cacheInvalidationPublisher.publishAfterCommit();
     }
 
     /**
@@ -92,13 +76,7 @@ public class ArticleServiceImpl implements ArticleService {
     public void addArticle(TbArticle tbArticle) {
         tbArticleMapper.insertSelective(tbArticle);
         //发消息更新缓存,清空缓存
-        jmsTemplate.send(queueDestination, new MessageCreator() {
-            @Override
-            public Message createMessage(Session session) throws JMSException {
-                System.out.println("已经发送消息");
-                return session.createTextMessage("delete_cache");
-            }
-        });
+        cacheInvalidationPublisher.publishAfterCommit();
     }
 
     /**
@@ -119,12 +97,6 @@ public class ArticleServiceImpl implements ArticleService {
     public void updateArticle(TbArticle tbArticle) {
         tbArticleMapper.updateByPrimaryKeySelective(tbArticle);
         //发消息更新缓存,清空缓存
-        jmsTemplate.send(queueDestination, new MessageCreator() {
-            @Override
-            public Message createMessage(Session session) throws JMSException {
-                System.out.println("已经发送消息");
-                return session.createTextMessage("delete_cache");
-            }
-        });
+        cacheInvalidationPublisher.publishAfterCommit();
     }
 }

@@ -17,6 +17,11 @@ public class JedisClientCluster implements JedisClient {
 		this.jedisCluster = jedisCluster;
 	}
 
+    @Override
+    public String setex(String key, int seconds, String value) {
+        return jedisCluster.setex(key, seconds, value);
+    }
+
 	@Override
 	public String set(String key, String value) {
 		return jedisCluster.set(key, value);

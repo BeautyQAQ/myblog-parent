@@ -23,18 +23,5 @@
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
-    <!-- 配置tomcat插件 -->
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.tomcat.maven</groupId>
-                <artifactId>tomcat7-maven-plugin</artifactId>
-                <configuration>
-                    <path>/</path>
-                    <port>8081</port>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>

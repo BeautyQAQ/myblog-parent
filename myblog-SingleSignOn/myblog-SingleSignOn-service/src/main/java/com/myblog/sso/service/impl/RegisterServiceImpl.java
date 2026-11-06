@@ -1,6 +1,6 @@
 package com.myblog.sso.service.impl;
 
-import com.alibaba.dubbo.common.utils.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import com.myblog.common.utils.Result;
 import com.myblog.mapper.TbUserMapper;
 import com.myblog.pojo.TbUser;

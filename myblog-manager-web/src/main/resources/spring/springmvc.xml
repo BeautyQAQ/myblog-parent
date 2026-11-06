@@ -2,12 +2,12 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
 	   xmlns:context="http://www.springframework.org/schema/context"
-	   xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	   xmlns:dubbo="http://dubbo.apache.org/schema/dubbo"
 	   xmlns:mvc="http://www.springframework.org/schema/mvc"
-	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
-		http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd
-        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd
-        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd">
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
 	<context:component-scan base-package="com.myblog.controller" />
 	<mvc:annotation-driven />
@@ -18,16 +18,12 @@
 	</bean>
 
 	<!-- 加载配置文件 -->
-	<context:property-placeholder location="classpath:conf/resource.properties" />
+	<import resource="classpath:myblog-config.xml"/>
 
 	<!-- 定义文件上传解析器 -->
+	<!-- 上传大小限制由 web.xml 中 DispatcherServlet 的 multipart-config 设置。 -->
 	<bean id="multipartResolver"
-		  class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
-		<!-- 设定默认编码 -->
-		<property name="defaultEncoding" value="UTF-8" />
-		<!-- 设定文件上传的最大值5MB，5*1024*1024 -->
-		<property name="maxUploadSize" value="5242880" />
-	</bean>
+		  class="org.springframework.web.multipart.support.StandardServletMultipartResolver" />
 
 
 	 <!--配置资源映射-->
@@ -36,7 +32,8 @@
 	<mvc:resources location="/resources/" mapping="/resources/**"/>
 
 	<!-- 引用dubbo服务 -->
-	<dubbo:application name="myblog-manager-web"/>
-	<dubbo:registry protocol="zookeeper" address="127.0.0.1:2181"/>
-	<dubbo:reference interface="com.myblog.service.ArticleService" id="articleService" />
+	<dubbo:application name="myblog-manager-web" qos-enable="false"/>
+	<dubbo:registry address="N/A"/>
+	<dubbo:reference interface="com.myblog.service.ArticleService" id="articleService" url="${dubbo.manager.url}" check="false" retries="0" timeout="45000"/>
+	<dubbo:reference interface="com.myblog.service.ImageService" id="imageService" url="${dubbo.manager.url}" check="false" retries="0" timeout="10000"/>
 </beans>

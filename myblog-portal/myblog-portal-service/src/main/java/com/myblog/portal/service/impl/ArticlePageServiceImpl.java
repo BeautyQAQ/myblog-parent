@@ -4,12 +4,12 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.myblog.common.jedis.JedisClient;
 import com.myblog.common.utils.JsonUtils;
-import com.myblog.portal.pojo.ArticleResult;
 import com.myblog.mapper.TbArticleMapper;
 import com.myblog.pojo.TbArticle;
+import com.myblog.portal.pojo.ArticleResult;
 import com.myblog.portal.service.ArticlePageService;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -18,71 +18,81 @@ import java.util.List;
 
 @Service
 public class ArticlePageServiceImpl implements ArticlePageService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArticlePageServiceImpl.class);
 
-    @Autowired
-    private TbArticleMapper tbArticleMapper;
-    @Autowired
-    private JedisClient jedisClient;
-    @Value("${ARTICLE_CACHE_EXPIRE}")
-    private Integer ARTICLE_CACHE_EXPIRE;
-    @Value("${CONTENT_LIST}")
-    private String CONTENT_LIST;
+    private final TbArticleMapper articleMapper;
+    private final JedisClient jedisClient;
+    private final int cacheExpire;
+    private final String cachePrefix;
+
+    public ArticlePageServiceImpl(TbArticleMapper articleMapper, JedisClient jedisClient,
+                                  @Value("${ARTICLE_CACHE_EXPIRE}") int cacheExpire,
+                                  @Value("${CONTENT_LIST}") String cachePrefix) {
+        this.articleMapper = articleMapper;
+        this.jedisClient = jedisClient;
+        this.cacheExpire = cacheExpire;
+        this.cachePrefix = cachePrefix;
+    }
 
     @Override
     public ArticleResult getPortalArticleListPage(int pageNum, int pageSize, String orderBy) {
-        //引入pagehelper插件，
-        //设置分页信息
-        PageHelper.startPage(pageNum,pageSize);
-        //执行分页查询
-        //根据排序参数执行相应的分页查询
+        if (pageNum < 1 || pageSize < 1) {
+            throw new IllegalArgumentException("pageNum and pageSize must be positive");
+        }
+        if (!"heat".equals(orderBy) && !"new".equals(orderBy)) {
+            throw new IllegalArgumentException("orderBy must be heat or new");
+        }
 
-        //先查缓存
+        String cacheKey = null;
         try {
-            String json = jedisClient.get(CONTENT_LIST);
-            if (StringUtils.isNotBlank(json)){
-                ArticleResult articleResult = JsonUtils.jsonToPojo(json, ArticleResult.class);
-                System.out.println("从缓存中查询");
-                return articleResult;
+            String version = jedisClient.get(cachePrefix + ":version");
+            cacheKey = cachePrefix + ":v" + (version == null ? "0" : version)
+                    + ':' + orderBy + ':' + pageNum + ':' + pageSize;
+            String json = jedisClient.get(cacheKey);
+            if (json != null && !json.isBlank()) {
+                ArticleResult cached = JsonUtils.jsonToPojo(json, ArticleResult.class);
+                if (cached != null) {
+                    return cached;
+                }
             }
-        }catch (Exception e){
-            e.printStackTrace();
+        } catch (RuntimeException e) {
+            // Fall back to MySQL; never write a cache entry without a known namespace.
+            cacheKey = null;
+            LOGGER.warn("Unable to read article cache; querying MySQL", e);
         }
 
-        //缓存中没有，就查数据库
-        List<TbArticle> tbArticleList=new ArrayList<>();
-        if ("heat".equals(orderBy)){
-            tbArticleList=tbArticleMapper.selectAllWithTextOrderByHeat();
-            System.out.println("从数据库中查询");
-        }
-        if ("new".equals(orderBy)){
-            tbArticleList=tbArticleMapper.selectAllWithTextOrderByNew();
-            System.out.println("从数据库中查询");
-        }
-        //使用pageinfo包装分页结果
-        PageInfo<TbArticle> tbArticlePageInfo = new PageInfo<TbArticle>(tbArticleList);
-        ArticleResult articleResult = new ArticleResult();
-        articleResult.setHasNextPage(tbArticlePageInfo.isHasNextPage());
-        articleResult.setHasPreviousPage(tbArticlePageInfo.isHasPreviousPage());
-        articleResult.setArticleList(tbArticlePageInfo.getList());
-        articleResult.setPageNum(tbArticlePageInfo.getPageNum());
-        articleResult.setPages(tbArticlePageInfo.getPages());
-        articleResult.setNavigatepageNums(tbArticlePageInfo.getNavigatepageNums());
-
-        //将数据库分页查询结果放入缓存
+        ArticleResult result;
+        // Start pagination only for a real SELECT, and clear it even if the query fails.
+        PageHelper.startPage(pageNum, pageSize);
         try {
-            jedisClient.set(CONTENT_LIST, JsonUtils.objectToJson(articleResult));
-            //设置过期时间
-            jedisClient.expire(CONTENT_LIST, ARTICLE_CACHE_EXPIRE);
-            System.out.println("将数据库数据放入缓存中");
+            List<TbArticle> articles = "heat".equals(orderBy)
+                    ? articleMapper.selectAllWithTextOrderByHeat()
+                    : articleMapper.selectAllWithTextOrderByNew();
+            PageInfo<TbArticle> page = new PageInfo<>(articles);
+            result = new ArticleResult();
+            result.setHasNextPage(page.isHasNextPage());
+            result.setHasPreviousPage(page.isHasPreviousPage());
+            result.setArticleList(new ArrayList<>(page.getList()));
+            result.setPageNum(page.getPageNum());
+            result.setPages(page.getPages());
+            result.setNavigatepageNums(page.getNavigatepageNums());
+        } finally {
+            PageHelper.clearPage();
         }
-        catch (Exception e){
-            e.printStackTrace();
+
+        if (cacheKey != null) {
+            try {
+                // SETEX keeps the value and its expiry atomic, including during Redis failures.
+                jedisClient.setex(cacheKey, cacheExpire, JsonUtils.objectToJson(result));
+            } catch (RuntimeException e) {
+                LOGGER.warn("Unable to cache article page {}", cacheKey, e);
+            }
         }
-        return articleResult;
+        return result;
     }
 
     @Override
     public TbArticle getArticleWithText(int articleId) {
-        return tbArticleMapper.selectByPrimaryKey(articleId);
+        return articleMapper.selectByPrimaryKey(articleId);
     }
 }

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.myblog.mapper.TbImageMapper">
+    <resultMap id="ImageResult" type="com.myblog.pojo.TbImage">
+        <id column="image_id" property="id" jdbcType="CHAR"/>
+        <result column="content_type" property="contentType" jdbcType="VARCHAR"/>
+        <result column="image_data" property="data" jdbcType="LONGVARBINARY"/>
+        <result column="created_at" property="createdAt" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.myblog.pojo.TbImage">
+        INSERT INTO tb_image (image_id, content_type, image_data, created_at)
+        VALUES (#{id,jdbcType=CHAR}, #{contentType,jdbcType=VARCHAR},
+                #{data,jdbcType=LONGVARBINARY}, #{createdAt,jdbcType=TIMESTAMP})
+    </insert>
+
+    <select id="selectByPrimaryKey" resultMap="ImageResult">
+        SELECT image_id, content_type, image_data, created_at
+        FROM tb_image
+        WHERE image_id = #{id,jdbcType=CHAR}
+    </select>
+</mapper>

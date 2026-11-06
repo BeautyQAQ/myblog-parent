@@ -31,7 +31,7 @@ editor.customConfig.pasteTextHandle = function (content) {
     return content + '<br>'
 }
 //上传图片保存到服务器
-editor.customConfig.uploadImgMaxSize = 4 * 1024 * 1024
+editor.customConfig.uploadImgMaxSize = 5 * 1024 * 1024
 editor.customConfig.uploadImgServer = '/upload'
 editor.customConfig.uploadFileName = 'picture'
 editor.customConfig.uploadImgHooks = {
@@ -69,8 +69,11 @@ editor.customConfig.uploadImgHooks = {
         // insertImg 是插入图片的函数，editor 是编辑器对象，result 是服务器端返回的结果
 
         // 举例：假如上传图片成功后，服务器端返回的是 {url:'....'} 这种格式，即可这样插入图片：
-        var url = result.url;
-        insertImg(url);
+        if (!result || result.error !== 0 || !result.url) {
+            alert(result && result.message ? result.message : '图片上传失败');
+            return;
+        }
+        insertImg(result.url);
 
         // result 必须是一个 JSON 格式字符串！！！否则报错
     }

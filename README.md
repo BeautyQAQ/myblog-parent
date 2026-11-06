@@ -1,96 +1,95 @@
 # 个人博客系统
 
-------
+这是大学时期写的一个 SOA 个人博客，也是保留下来的一段回忆。
 
-此项目是一个基于SOA架构的项目，目前为止完成的功能有：
+- [university](https://github.com/BeautyQAQ/myblog-parent/tree/university)：保留原 master 的 be53508 快照，保存大学时期的代码和部署说明。
+- main：新的默认分支，承载后续升级与修复，保留原来的文章管理、前台展示和服务拆分思路。
 
-> * 后台文章管理
-> * 前台文章显示
+## 项目介绍
 
-后续将增加：
+项目将 Web 页面与业务服务拆成独立工程。后台提供文章管理，前台展示文章列表和详情，SSO 工程包含注册、登录与 token 查询。评论、点赞、浏览量和热度等功能仍属于后续完善方向。
 
-> * 单点登录
-> * 用户评论，点赞，浏览量，热度增加等
+main 保留 Spring MVC、MyBatis、JSP 和 Dubbo 独立服务：MySQL 存储业务数据，Redis 提供文章缓存和登录会话，Kafka 传递文章变更后的缓存失效事件。图片以 MEDIUMBLOB 保存在 MySQL，通过 manager-web 的 /images/{id} 接口读取。Dubbo 改用可配置地址直连，移除应用对 ZooKeeper 和 ActiveMQ 的依赖。
 
-## 什么是 SOA架构
+## 升级基线与进度
 
-**SOA：Service Oriented Architecture ：** 面向服务的架构。也就是把工程拆分成服务层、表现层两个工程。服务层中包含业务逻辑，只需要对外提供服务即可。表现层只需要处理和页面的交互，业务逻辑都是调用服务层的服务来实现。
+本轮已实现 JDK 21、Spring Framework 7、MyBatis 3.6 / MyBatis-Spring 4.1、Dubbo 3.3 和 Jakarta EE 11 对应 API 的升级基线。开发环境通过 Jetty 12.1 启动，生产部署目标为 Tomcat 11 WAR。依赖的确切版本以根目录 [pom.xml](pom.xml) 为准。
 
-**使用技术 :** Spring、SpringMVC、MyBatis、JSP、Ajax、JSON、MySQL数据库、redis缓存、negix服务器、dubbo发布服务、ActiveMQ消息队列
+MySQL 和 Redis 连接信息通过 DBX 的 nas-mysql、nas-redis 获取，Kafka 连接也通过 DBX 检查。**DBX 用于查验连接与辅助测试；Java 应用运行时直接通过 JDBC、Jedis 和 Kafka 客户端访问对应服务。**
 
-**项目内容 ：** 后台文章管理模块、前台文章显示模块
+DBX 已确认 nas-mysql 为 MySQL 8.1.0，nas-redis 为 Redis 8.6.2 单机。独立 myblog 库及四张表已初始化，未导入旧演示数据，未修改其他业务库。按项目约定，当前组网环境的连接地址、账号和密码统一保存在 myblog-common/src/main/resources/myblog-defaults.properties，随仓库管理。
 
-**详细信息 ：** 给项目是一个分布式的SOA架构，后台用Spring+MyBatis实现，模块之间的通信用的dubbo，静态资源由nginx服务器访问，redis做缓存服务，将前台界面放入缓存，ActiveMQ消息队列。目前还没有登录功能，后续要增加SSO单点登录系统。
+本轮 16 个 Maven 模块 clean install 成功，29 个测试零失败；六个 WAR 真实启动，15 项 HTTP 检查全部通过，覆盖 JSP、分页列表、SSO 缺失 token 查询、图片上传与读取、文章新增和删除后的 Kafka 缓存失效。RPC 分页响应使用标准 Map / ArrayList，保留原 JSON 结构并维持 Dubbo STRICT 检查。完整注册登录与 Cookie 流程、Tomcat 11 生产部署和历史图片迁移尚未覆盖，详见 [JDK 21 升级说明](docs/upgrade-jdk21.md)。
 
-## 项目部署
+## 本地构建与启动
 
-**1.建表和导入数据：** 数据库用的是MySQL5.7，当前建立3张表，tb_article表，tb_user表，tb_userlog(用户行为记录)表。由于目前系统还不是很完整，所有暂时只对tb_article表进行操作。
+安装 JDK 21 和 Maven，确认 Maven 使用 JDK 21。macOS 先显式设置 JAVA_HOME；本机 Homebrew Maven 在未设置时默认使用 JDK 26，即使 java -version 显示 21，也会被本项目的 JDK 21 检查拒绝：
 
-**2.导入项目：** 项目下载后，将父工程导入进IntelliJ IDEA Ultimate，我的IDEA版本是2018.3。
+~~~bash
+export JAVA_HOME="$(/usr/libexec/java_home -v 21)"
+java -version
+mvn -version
+mvn clean install
+~~~
 
-**3.项目启动：** 项目导入后，配置maven启动项，此项目是用tomcat插件方式启动。方法如下图：
+仓库默认配置已包含 NAS MySQL / Redis 地址、账号密码、测试 Kafka 地址及本机 Dubbo 直连地址，在当前组网环境可直接启动。默认配置位于 [myblog-defaults.properties](myblog-common/src/main/resources/myblog-defaults.properties)。
 
-![](https://s1.ax1x.com/2020/04/24/JBI6D1.jpg)
-*1.点击`+`,选择maven*  
-*2.点击2号标记的文件夹，选择要配置的项目，此项目中要配置4个项目启动项，分别是：*  
-**1.myblog-portal-web**  
-**2.myblog-portal**  
-**3.myblog-manager-web**  
-**4.myblog-manager**  
-*注意，是一个一个项目模块单独配置*  
-*3.在3号输入框中输入`clean tomcat7:run`*  
-*4.然后就可以启动了，注意要先启动后台模块，再启动前台web模块哦！！！*
+切换其他环境时，可使用 [myblog-local.example.properties](myblog-local.example.properties) 作为可选覆盖模板，并通过 MYBLOG_CONFIG_LOCATION 指向外部文件，例如 file:/绝对路径/myblog-local.properties。使用仓库默认环境时无需复制模板或设置该变量。
 
-> 1.项目想要成功启动，需要安装zookeeper注册中心(因为此项目用到了dubbo服务治理框架，需要zookeeper)，我用的是zookeeper 3.4.10 Linux版(Ubuntu 16.4)，下载安装好zookeeper之后，进入zookeeper/bin文件夹下 输入如下命令：
+新环境先对独立 myblog 库执行 [V1__initial_schema.sql](db/migration/V1__initial_schema.sql) 和 [V2__images.sql](db/migration/V2__images.sql)，并预创建 Kafka topic；这些步骤不会由应用自动执行。当前 NAS 环境已完成初始化。原始 [myblog.sql](myblog.sql) 作为历史资料保留，详见升级说明。
 
-```
-@DESKTOP-2BGCAV8:/zookeeper-3.4.10/bin$ ./zkServer.sh start
-```
-> 提示Starting zookeeper ... STARTED 就启动完成啦
-****
-> 2.要想访问项目的静态资源(图片等)，还需要启动nginx(因为此项目是由nginx作为静态资源服务器，访问图片需要nginx，我用的是windows下的nginx-1.14.1版本，之所以不用linux版是windows向Linux传文件的时候，需要其他的工具，例如FTP服务等等),下载好nginx后还需要配置nginx-1.14.1\conf\nginx.conf文件，在server配置中添加一个location配置：
-```
-    location /images{
-        root  D:\img; #需要在创建D:\img\images目录作为图片上传文件夹
-                      #访问图片的url为：http://127.0.0.1:80/images/xxxxx.jpg
-    }
-```
->配置完成后启动nginx
+从仓库根目录，在**独立终端**按以下顺序启动六个 WAR。每个终端都需设置 JDK 21：
 
-****
-> 3.项目已经加入redis缓存，需要启动redis，(当然，不启动也没关系，只是没有缓存而已，数据库还是能用的，增加缓存的意义是为了提高系统的性能，应对更大的并发)。这里我只提供Ubuntu下的安装方法：  
-1)先更新APT缓存，然后安装redis,输入如下命令
-```
-sudo apt-get update
-sudo apt-get install redis-server
+~~~bash
+export JAVA_HOME="$(/usr/libexec/java_home -v 21)"
+~~~
 
-```
-> 2)以配置文件启动方式启动redis(默认是后台启动)
-```
-sudo redis-server /etc/redis/redis.conf #这个是redis.conf的路径，根据你实际路径输入
-```
-> 没有提示就表示启动成功了！！！
-****
-> 4.项目已经加入ActiveMQ消息队列，所以还要启动项目已经加入ActiveMQ消息队列，我这边使用的是apache-activemq-5.12.0 Linux版，下载解压好activemq后，进入activemq/bin文件夹下 输入如下命令：
-```
-@DESKTOP-2BGCAV8:/apache-activemq-5.12.0/bin$ ./activemq start
-```
-> 输出INFO提示信息就启动成功了，可以测试一下，打开浏览器，输入`http://localhost:8161`,可以进入Apache ActiveMQ!欢迎页面。
+先确认业务服务就绪，再启动 Web 工程：
 
-**4.运行：** 以上配置部署完成和4个项目模块启动成功后，就可以看看项目情况了，打开浏览器输入`localhost:8082`是后台管理界面，输入`localhost:8084`是前台界面。
+~~~bash
+mvn -pl myblog-manager/myblog-manager-service jetty:run
+mvn -pl myblog-portal/myblog-portal-service jetty:run
+mvn -pl myblog-SingleSignOn/myblog-SingleSignOn-service jetty:run
+mvn -pl myblog-manager-web jetty:run
+mvn -pl myblog-portal-web jetty:run
+mvn -pl myblog-SingleSignOn-web jetty:run
+~~~
 
-### 运行效果
+jetty:run 持续占用当前终端，按 Ctrl+C 停止。Jetty 插件只在 WAR 模块启用。
 
-**前台界面，文章列表**
+| 应用 | HTTP 端口 | Dubbo 端口 | 用途 |
+| --- | --- | --- | --- |
+| myblog-portal-service | 8081 | 20881 | 前台文章服务 |
+| myblog-portal-web | 8082 | — | [前台页面](http://localhost:8082/) |
+| myblog-manager-service | 8083 | 20880 | 后台文章管理服务 |
+| myblog-manager-web | 8084 | — | [后台页面](http://localhost:8084/) |
+| myblog-SingleSignOn-service | 8085 | 20882 | 注册、登录和会话服务 |
+| myblog-SingleSignOn-web | 8086 | — | [登录页面](http://localhost:8086/page/login) |
 
-![cmd-markdown-logo](https://s1.ax1x.com/2020/04/24/JB4k5D.jpg)
+生产环境将构建生成的 WAR 部署到 Tomcat 11，配置实际域名、上下文路径、RPC 直连地址和数据库连接。图片由应用提供读取接口，无需单独部署图片目录、对象存储或 Nginx 图片服务器。Jetty Maven 插件用于开发启动。
+
+## 官方参考
+
+- [Spring Framework 7](https://docs.spring.io/spring-framework/reference/overview.html)
+- [Jakarta EE 11](https://jakarta.ee/specifications/platform/11/)
+- [Apache Dubbo 3.3.6](https://github.com/apache/dubbo/blob/dubbo-3.3.6/README.md) 与 [直连配置](https://dubbo.apache.org/en/overview/mannual/java-sdk/tasks/framework/more/explicit-target/)
+- [Jetty 12.1 Maven 插件](https://jetty.org/docs/jetty/12.1/programming-guide/maven-jetty/jetty-maven-plugin.html)
+- [Tomcat 11](https://tomcat.apache.org/tomcat-11.0-doc/index.html)
+
+## 大学时期的运行效果
+
+以下截图保留当年的界面。原始实现和当时的部署方式可在 [university](https://github.com/BeautyQAQ/myblog-parent/tree/university) 分支查看。
+
+**前台文章列表**
+
+![大学时期的前台文章列表](https://s1.ax1x.com/2020/04/24/JB4k5D.jpg)
 
 **文章详情**
 
-![cmd-markdown-logo](https://s1.ax1x.com/2020/04/24/JB4V8H.jpg)
+![大学时期的文章详情](https://s1.ax1x.com/2020/04/24/JB4V8H.jpg)
 
 **后台界面**
 
-![cmd-markdown-logo](https://s1.ax1x.com/2020/04/24/JB4EPe.jpg)
+![大学时期的后台界面](https://s1.ax1x.com/2020/04/24/JB4EPe.jpg)
 
-![cmd-markdown-logo](https://s1.ax1x.com/2020/04/24/JB4FUO.jpg)
+![大学时期的后台文章管理](https://s1.ax1x.com/2020/04/24/JB4FUO.jpg)

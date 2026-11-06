@@ -1,2 +1,7 @@
-.idea
-target
+.idea/
+**/target/
+.DS_Store
+.codex/
+.env
+.env.local
+myblog-local.properties

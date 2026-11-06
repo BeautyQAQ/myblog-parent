@@ -4,6 +4,8 @@ import java.util.List;
 
 public interface JedisClient {
 
+    String setex(String key, int seconds, String value);
+
 	String set(String key, String value);
 	String get(String key);
 	Boolean exists(String key);
