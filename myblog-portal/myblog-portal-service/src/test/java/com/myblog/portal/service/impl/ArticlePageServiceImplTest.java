@@ -95,10 +95,11 @@ class ArticlePageServiceImplTest {
 
         assertEquals(4, queries.get());
         assertEquals(4, cache.size());
-        assertTrue(cache.containsKey("test:articles:published:v0:new:1:10"));
-        assertTrue(cache.containsKey("test:articles:published:v0:new:2:10"));
-        assertTrue(cache.containsKey("test:articles:published:v0:heat:1:10"));
-        assertTrue(cache.containsKey("test:articles:published:v0:new:1:20"));
+        service.getPortalArticleListPage(1, 10, "new");
+        service.getPortalArticleListPage(2, 10, "new");
+        service.getPortalArticleListPage(1, 10, "heat");
+        service.getPortalArticleListPage(1, 20, "new");
+        assertEquals(4, queries.get());
     }
 
     @Test
@@ -121,8 +122,10 @@ class ArticlePageServiceImplTest {
         service.getPortalArticleListPage(2, 10, "heat");
 
         assertEquals(4, queries.get());
-        assertTrue(cache.containsKey("test:articles:published:v1:new:1:10"));
-        assertTrue(cache.containsKey("test:articles:published:v1:heat:2:10"));
+        service.getPortalArticleListPage(1, 10, "new");
+        service.getPortalArticleListPage(2, 10, "heat");
+        assertEquals(4, queries.get());
+        assertEquals("1", cache.get("test:articles:version"));
     }
 
     @Test

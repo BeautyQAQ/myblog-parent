@@ -11,6 +11,7 @@ public class ArticleResult implements Serializable {
     private boolean hasNextPage;    //是否有后一页
     private int pageNum;            //当前页
     private int pages;              //总页数
+    private long total;             //符合当前检索条件的总篇数
     private int[] navigatepageNums;   //所有导航号
 	private List<TbArticle> articleList;
 
@@ -48,6 +49,14 @@ public class ArticleResult implements Serializable {
 
     public int getPages() {
         return pages;
+    }
+
+    public long getTotal() {
+        return total;
+    }
+
+    public void setTotal(long total) {
+        this.total = total;
     }
 
     public void setPages(int pages) {

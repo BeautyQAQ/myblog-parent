@@ -32,6 +32,11 @@ public interface TbArticleMapper {
 
     List<TbArticle> selectAllWithTextOrderByNew();
 
+    List<TbArticle> selectPublishedArticles(@Param("titlePattern") String titlePattern,
+            @Param("tag") String tag, @Param("orderBy") String orderBy);
+
+    List<String> selectPublishedTags();
+
     int updateByExampleSelective(@Param("record") TbArticle record, @Param("example") TbArticleExample example);
 
     int updateByExampleWithBLOBs(@Param("record") TbArticle record, @Param("example") TbArticleExample example);

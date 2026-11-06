@@ -6,6 +6,8 @@ import com.myblog.common.security.SessionSecurity;
 import com.myblog.common.utils.Result;
 import com.myblog.sso.service.TokenService;
 import jakarta.servlet.http.Cookie;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
 import com.myblog.portal.pojo.ArticleResult;
 import com.myblog.portal.service.ArticlePageService;
 import org.junit.jupiter.api.AfterEach;
@@ -28,9 +30,14 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayOutputStream;
+import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -73,8 +80,12 @@ class PortalTemplatesTest {
         assertEquals("heat", service.orderBy);
         assertEquals(20, service.pageSize);
         assertTrue(html.contains("href=\"/blog/blogs?articleId=42\""));
-        assertTrue(html.contains("href=\"/blog/?pageNum=3&amp;pageSize=20&amp;orderBy=heat\""));
-        assertTrue(html.contains("href=\"/blog/?pageNum=1&amp;pageSize=20&amp;orderBy=heat\""));
+        Map<String, String> nextPage = queryParameters(Jsoup.parse(html).selectFirst("a[aria-label='下一页']"));
+        assertEquals("3", nextPage.get("pageNum"));
+        assertEquals("20", nextPage.get("pageSize"));
+        assertEquals("heat", nextPage.get("orderBy"));
+        assertEquals("", nextPage.get("q"));
+        assertEquals("", nextPage.get("tag"));
         assertTrue(html.contains("href=\"/blog/css/bootstrap.min.css\""));
         assertTrue(html.contains("src=\"/blog/resources/images/avatar-defualt.jpg\""));
         assertTrue(html.contains("href=\"http://localhost:8086/page/login\""));
@@ -242,6 +253,158 @@ class PortalTemplatesTest {
         assertNull(response.getCookie(SessionSecurity.TOKEN_COOKIE));
     }
 
+    @Test
+    void combinesNormalizedTitleAndTagFiltersWithANativeGetForm() throws Exception {
+        String keyword = "Java & <script>中文</script>";
+        String tag = "Java, Spring & Web";
+        service.publishedTags = List.of("Java", tag);
+        service.total = 28;
+        MockHttpServletResponse response = mvc.perform(get("/blog/").contextPath("/blog")
+                .param("q", "　" + keyword + "　").param("tag", "  " + tag + "  ")
+                .param("pageNum", "2").param("pageSize", "20").param("orderBy", "heat"))
+                .andReturn().getResponse();
+        String html = response.getContentAsString();
+        org.jsoup.nodes.Document document = Jsoup.parse(html);
+        assertEquals(200, response.getStatus());
+        assertEquals(keyword, service.keyword);
+        assertEquals(tag, service.tag);
+        assertEquals(1, service.fiveParameterQueries);
+        Element form = document.selectFirst("#article-search-form");
+        assertNotNull(form);
+        assertEquals("get", form.attr("method"));
+        assertEquals("/blog/", form.attr("action"));
+        assertEquals("1", form.selectFirst("input[name=pageNum]").val());
+        assertEquals("20", form.selectFirst("input[name=pageSize]").val());
+        assertEquals("heat", form.selectFirst("input[name=orderBy]").val());
+        assertEquals(keyword, form.selectFirst("input[name=q]").val());
+        assertEquals(tag, form.selectFirst("select[name=tag] option[selected]").val());
+        assertTrue(document.selectFirst(".search-summary").text().contains(keyword));
+        assertTrue(document.selectFirst(".search-summary").text().contains(tag));
+        assertTrue(document.selectFirst(".search-summary").text().contains("28"));
+        assertFalse(html.contains("<script>中文</script>"));
+    }
+
+    @Test
+    void paginationAndSortLinksEncodeAndPreserveEveryActiveCondition() throws Exception {
+        String keyword = "C++ & 中文/?#";
+        String tag = "Java, Spring & Web";
+        String html = mvc.perform(get("/blog/").contextPath("/blog")
+                .param("q", keyword).param("tag", tag).param("pageNum", "2")
+                .param("pageSize", "20").param("orderBy", "heat")).andReturn().getResponse().getContentAsString();
+        org.jsoup.nodes.Document document = Jsoup.parse(html);
+        for (Element link : document.select("nav[aria-label='文章分页'] a")) {
+            Map<String, String> parameters = queryParameters(link);
+            assertEquals("/blog/", URI.create(link.attr("href")).getPath());
+            assertEquals("20", parameters.get("pageSize"));
+            assertEquals("heat", parameters.get("orderBy"));
+            assertEquals(keyword, parameters.get("q"));
+            assertEquals(tag, parameters.get("tag"));
+        }
+        assertEquals("3", queryParameters(document.selectFirst("a[aria-label='下一页']")).get("pageNum"));
+        for (Element link : document.select(".navbar-nav a")) {
+            Map<String, String> parameters = queryParameters(link);
+            assertEquals("1", parameters.get("pageNum"));
+            assertEquals("20", parameters.get("pageSize"));
+            assertEquals(keyword, parameters.get("q"));
+            assertEquals(tag, parameters.get("tag"));
+            assertEquals(link.text().equals("最新") ? "new" : "heat", parameters.get("orderBy"));
+        }
+        Map<String, String> cleared = queryParameters(document.selectFirst(".article-search a"));
+        assertEquals("1", cleared.get("pageNum"));
+        assertEquals("20", cleared.get("pageSize"));
+        assertEquals("heat", cleared.get("orderBy"));
+        assertFalse(cleared.containsKey("q"));
+        assertFalse(cleared.containsKey("tag"));
+    }
+
+    @Test
+    void listAndDetailTagsLinkToAnExactWholeTagFilter() throws Exception {
+        String tag = "Java, Spring & Web";
+        service.selected.setArticleTag(tag);
+        service.publishedTags = List.of(tag);
+        String html = mvc.perform(get("/").param("q", "文章").param("pageSize", "20").param("orderBy", "heat"))
+                .andReturn().getResponse().getContentAsString();
+        Element link = Jsoup.parse(html).selectFirst(".article-tags a");
+        assertEquals(tag, link.text());
+        assertEquals(tag, queryParameters(link).get("tag"));
+        assertEquals("文章", queryParameters(link).get("q"));
+        assertEquals("20", queryParameters(link).get("pageSize"));
+        assertEquals("1", queryParameters(link).get("pageNum"));
+        html = mvc.perform(get("/blogs").param("articleId", "42")).andReturn().getResponse().getContentAsString();
+        link = Jsoup.parse(html).selectFirst("a.badge");
+        assertEquals(tag, link.text());
+        assertEquals(tag, queryParameters(link).get("tag"));
+        assertEquals("1", queryParameters(link).get("pageNum"));
+    }
+
+    @Test
+    void distinguishesNoMatchesFromAnEmptyUnfilteredBlogAndKeepsUnknownTagsSelected() throws Exception {
+        service.empty = true;
+        String tag = "不存在的标签";
+        String html = mvc.perform(get("/").param("q", "无结果").param("tag", tag))
+                .andReturn().getResponse().getContentAsString();
+        org.jsoup.nodes.Document document = Jsoup.parse(html);
+        assertTrue(document.text().contains("没有找到符合条件的文章"));
+        assertFalse(document.text().contains("暂无文章"));
+        assertTrue(document.text().contains("清除筛选条件，查看全部文章"));
+        assertEquals(tag, document.selectFirst("select[name=tag] option[selected]").val());
+        assertFalse(html.contains("aria-label=\"文章分页\""));
+        html = mvc.perform(get("/").param("q", "　 ").param("tag", "\t "))
+                .andReturn().getResponse().getContentAsString();
+        assertEquals("", service.keyword);
+        assertEquals("", service.tag);
+        assertTrue(html.contains("暂无文章"));
+        assertFalse(html.contains("没有找到符合条件的文章"));
+        assertFalse(html.contains("清除条件</a>"));
+    }
+
+    @Test
+    void acceptsFiftyUnicodeCharactersAndRejectsLongerFiltersBeforeAnyRemoteQuery() throws Exception {
+        String fifty = "😀".repeat(50);
+        assertEquals(200, mvc.perform(get("/").param("q", "　" + fifty + "　").param("tag", fifty))
+                .andReturn().getResponse().getStatus());
+        assertEquals(fifty, service.keyword);
+        assertEquals(fifty, service.tag);
+        int listQueries = service.listQueries;
+        int tagQueries = service.tagQueries;
+        for (String name : List.of("q", "tag")) {
+            for (String value : List.of("😀".repeat(51), "中".repeat(51))) {
+                MockHttpServletResponse response = mvc.perform(get("/").param(name, value)).andReturn().getResponse();
+                assertEquals(400, response.getStatus());
+                assertTrue(response.getContentAsString().contains("各不超过 50 个字符"));
+            }
+        }
+        assertEquals(listQueries, service.listQueries);
+        assertEquals(tagQueries, service.tagQueries);
+    }
+
+    @Test
+    void escapesEveryTagOptionAndFilterLabel() throws Exception {
+        String tag = "<img src=x onerror=alert(1)>";
+        service.publishedTags = List.of(tag);
+        service.selected.setArticleTag(tag);
+        String html = mvc.perform(get("/").param("tag", tag)).andReturn().getResponse().getContentAsString();
+        org.jsoup.nodes.Document document = Jsoup.parse(html);
+        assertEquals(tag, document.selectFirst("select[name=tag] option[selected]").text());
+        assertEquals(tag, document.selectFirst(".article-tags a").text());
+        assertTrue(document.selectFirst(".search-summary").text().contains(tag));
+        assertFalse(html.contains("<img src=x onerror=alert(1)>"));
+        assertTrue(document.select("[onerror]").isEmpty());
+    }
+
+    private static Map<String, String> queryParameters(Element link) {
+        assertNotNull(link);
+        Map<String, String> parameters = new LinkedHashMap<>();
+        String query = URI.create(link.attr("href")).getRawQuery();
+        if (query == null) return parameters;
+        for (String item : query.split("&")) {
+            String[] pair = item.split("=", 2);
+            parameters.put(URLDecoder.decode(pair[0], StandardCharsets.UTF_8),
+                    pair.length == 2 ? URLDecoder.decode(pair[1], StandardCharsets.UTF_8) : "");
+        }
+        return parameters;
+    }
+
     private static class StubTokenService implements TokenService {
         private TbUser user;
         private boolean unavailable;
@@ -294,20 +457,41 @@ class PortalTemplatesTest {
         private String orderBy;
         private int pageSize;
         private int articleId;
+        private String keyword;
+        private String tag;
+        private int tagQueries;
+        private int fiveParameterQueries;
+        private long total = 30;
+        private List<String> publishedTags = List.of("Java", "Spring");
 
         @Override
         public ArticleResult getPortalArticleListPage(int pageNum, int pageSize, String orderBy) {
+            return getPortalArticleListPage(pageNum, pageSize, orderBy, "", "");
+        }
+
+        @Override
+        public ArticleResult getPortalArticleListPage(int pageNum, int pageSize, String orderBy, String keyword, String tag) {
             listQueries++;
+            fiveParameterQueries++;
+            this.keyword = keyword;
+            this.tag = tag;
             this.orderBy = orderBy;
             this.pageSize = pageSize;
             ArticleResult result = new ArticleResult();
             result.setArticleList(empty ? List.of() : List.of(selected));
+            result.setTotal(empty ? 0 : total);
             result.setPageNum(pageNum);
             result.setPages(empty ? 0 : 3);
             result.setHasPreviousPage(!empty && pageNum > 1);
             result.setHasNextPage(!empty && pageNum < 3);
             result.setNavigatepageNums(empty ? new int[0] : new int[]{1, 2, 3});
             return result;
+        }
+
+        @Override
+        public List<String> getPublishedTags() {
+            tagQueries++;
+            return publishedTags;
         }
 
         @Override

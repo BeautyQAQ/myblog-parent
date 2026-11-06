@@ -160,6 +160,36 @@
     where article_status = 'PUBLISHED'
     order by published_at desc, article_id desc
   </select>
+  <select id="selectPublishedArticles" resultMap="ResultMapWithBLOBs">
+    select
+    <include refid="Base_Column_List"/>
+    ,
+    <include refid="Blob_Column_List"/>
+    from tb_article
+    where article_status = 'PUBLISHED'
+    <if test="titlePattern != null and titlePattern != ''">
+      and article_title LIKE #{titlePattern,jdbcType=VARCHAR} ESCAPE '='
+    </if>
+    <if test="tag != null and tag != ''">
+      and TRIM(article_tag) = #{tag,jdbcType=VARCHAR}
+    </if>
+    <choose>
+      <when test="orderBy == 'heat'">
+        order by article_heat desc, published_at desc, article_id desc
+      </when>
+      <otherwise>
+        order by published_at desc, article_id desc
+      </otherwise>
+    </choose>
+  </select>
+  <select id="selectPublishedTags" resultType="java.lang.String">
+    select distinct TRIM(article_tag) as tag
+    from tb_article
+    where article_status = 'PUBLISHED'
+      and article_tag is not null
+      and TRIM(article_tag) != ''
+    order by tag asc
+  </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from tb_article
     where article_id = #{articleId,jdbcType=INTEGER}

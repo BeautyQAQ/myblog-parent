@@ -13,6 +13,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +40,14 @@ public class ArticlePageServiceImpl implements ArticlePageService {
 
     @Override
     public ArticleResult getPortalArticleListPage(int pageNum, int pageSize, String orderBy) {
+        return getPortalArticleListPage(pageNum, pageSize, orderBy, null, null);
+    }
+
+    @Override
+    public ArticleResult getPortalArticleListPage(int pageNum, int pageSize, String orderBy,
+                                                 String keyword, String tag) {
+        keyword = normalizeFilter(keyword);
+        tag = normalizeFilter(tag);
         if (pageNum < 1 || pageSize < 1 || pageSize > 100) {
             throw new IllegalArgumentException("pageNum must be positive and pageSize must be between 1 and 100");
         }
@@ -45,9 +57,8 @@ public class ArticlePageServiceImpl implements ArticlePageService {
 
         String cacheKey = null;
         try {
-            String version = jedisClient.get(cachePrefix + ":version");
-            cacheKey = cachePrefix + ":published:v" + (version == null ? "0" : version)
-                    + ':' + orderBy + ':' + pageNum + ':' + pageSize;
+            cacheKey = cacheNamespace() + ":page:" + orderBy + ':' + pageNum + ':' + pageSize
+                    + ':' + filterDigest(keyword, tag);
             String json = jedisClient.get(cacheKey);
             if (json != null && !json.isBlank()) {
                 ArticleResult cached = JsonUtils.jsonToPojo(json, ArticleResult.class);
@@ -65,9 +76,9 @@ public class ArticlePageServiceImpl implements ArticlePageService {
         // Start pagination only for a real SELECT, and clear it even if the query fails.
         PageHelper.startPage(pageNum, pageSize);
         try {
-            List<TbArticle> articles = "heat".equals(orderBy)
-                    ? articleMapper.selectAllWithTextOrderByHeat()
-                    : articleMapper.selectAllWithTextOrderByNew();
+            String titlePattern = keyword == null ? null : "%" + keyword.replace("=", "==")
+                    .replace("%", "=%").replace("_", "=_") + "%";
+            List<TbArticle> articles = articleMapper.selectPublishedArticles(titlePattern, tag, orderBy);
             PageInfo<TbArticle> page = new PageInfo<>(articles);
             result = new ArticleResult();
             result.setHasNextPage(page.isHasNextPage());
@@ -75,6 +86,7 @@ public class ArticlePageServiceImpl implements ArticlePageService {
             result.setArticleList(new ArrayList<>(page.getList()));
             result.setPageNum(page.getPageNum());
             result.setPages(page.getPages());
+            result.setTotal(page.getTotal());
             result.setNavigatepageNums(page.getNavigatepageNums());
         } finally {
             PageHelper.clearPage();
@@ -89,6 +101,64 @@ public class ArticlePageServiceImpl implements ArticlePageService {
             }
         }
         return result;
+    }
+
+    @Override
+    public List<String> getPublishedTags() {
+        String cacheKey = null;
+        try {
+            cacheKey = cacheNamespace() + ":tags";
+            String json = jedisClient.get(cacheKey);
+            if (json != null && !json.isBlank()) {
+                List<String> tags = JsonUtils.jsonToList(json, String.class);
+                if (tags != null) return new ArrayList<>(tags);
+            }
+        } catch (RuntimeException e) {
+            cacheKey = null;
+            LOGGER.warn("Unable to read article tags cache; querying MySQL", e);
+        }
+        List<String> tags;
+        try {
+            tags = new ArrayList<>(articleMapper.selectPublishedTags());
+        } finally {
+            PageHelper.clearPage();
+        }
+        if (cacheKey != null) {
+            try {
+                jedisClient.setex(cacheKey, cacheExpire, JsonUtils.objectToJson(tags));
+            } catch (RuntimeException e) {
+                LOGGER.warn("Unable to cache article tags", e);
+            }
+        }
+        return tags;
+    }
+
+    private String cacheNamespace() {
+        String version = jedisClient.get(cachePrefix + ":version");
+        // New search pages include totals and filters, so pre-search cached DTOs are never reused.
+        return cachePrefix + ":published:search:v" + (version == null ? "0" : version);
+    }
+
+    private static String normalizeFilter(String value) {
+        if (value == null) return null;
+        value = value.strip();
+        if (value.codePointCount(0, value.length()) > 50) {
+            throw new IllegalArgumentException("搜索关键词和标签不能超过 50 个字符");
+        }
+        return value.isEmpty() ? null : value;
+    }
+
+    private static String filterDigest(String keyword, String tag) {
+        String first = keyword == null ? "" : keyword;
+        String second = tag == null ? "" : tag;
+        // Length prefixes keep query/tag boundaries unambiguous, including literal ':' characters.
+        String filters = first.length() + ":" + first + second.length() + ":" + second;
+        try {
+            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
+                    .digest(filters.getBytes(StandardCharsets.UTF_8)));
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 unavailable", e);
+        }
     }
 
     @Override

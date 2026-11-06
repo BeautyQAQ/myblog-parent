@@ -12,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.LinkedHashMap;
@@ -23,6 +24,14 @@ public class PortalArticleController {
 
     public PortalArticleController(ArticlePageService articlePageService) {
         this.articlePageService = articlePageService;
+    }
+
+    @ModelAttribute
+    public void defaultSearchContext(Model model) {
+        model.addAttribute("keyword", "");
+        model.addAttribute("selectedTag", "");
+        model.addAttribute("pageSize", 10);
+        model.addAttribute("orderBy", "new");
     }
 
     @GetMapping("/blogs")
@@ -47,12 +56,17 @@ public class PortalArticleController {
     public String getArticleListPage(@RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
                                      @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
                                      @RequestParam(value = "orderBy", defaultValue = "new") String orderBy,
+                                     @RequestParam(value = "q", defaultValue = "") String keyword,
+                                     @RequestParam(value = "tag", defaultValue = "") String tag,
                                      Model model) {
         if (pageNum < 1 || pageSize < 1 || pageSize > 100
                 || (!"new".equals(orderBy) && !"heat".equals(orderBy))) {
             throw new IllegalArgumentException("Invalid pagination or sort parameters");
         }
-        ArticleResult result = articlePageService.getPortalArticleListPage(pageNum, pageSize, orderBy);
+        String normalizedKeyword = normalizeFilter(keyword);
+        String normalizedTag = normalizeFilter(tag);
+        ArticleResult result = articlePageService.getPortalArticleListPage(pageNum, pageSize, orderBy,
+                normalizedKeyword, normalizedTag);
         Map<Integer, String> summaries = new LinkedHashMap<>();
         for (TbArticle article : result.getArticleList()) {
             String text = Jsoup.parse(article.getArticleText() == null ? "" : article.getArticleText()).text();
@@ -70,7 +84,20 @@ public class PortalArticleController {
         model.addAttribute("articleSummaries", summaries);
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("orderBy", orderBy);
+        model.addAttribute("keyword", normalizedKeyword);
+        model.addAttribute("selectedTag", normalizedTag);
+        model.addAttribute("hasFilters", !normalizedKeyword.isEmpty() || !normalizedTag.isEmpty());
+        model.addAttribute("publishedTags", articlePageService.getPublishedTags());
+        model.addAttribute("total", result.getTotal());
         return "index";
+    }
+
+    private static String normalizeFilter(String value) {
+        String normalized = value == null ? "" : value.strip();
+        if (normalized.codePointCount(0, normalized.length()) > 50) {
+            throw new IllegalArgumentException("Search keywords and tags must not exceed 50 characters");
+        }
+        return normalized;
     }
 
     @ExceptionHandler({IllegalArgumentException.class, MissingServletRequestParameterException.class,
@@ -78,7 +105,7 @@ public class PortalArticleController {
     public String invalidRequest(Model model, HttpServletResponse response) {
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         model.addAttribute("errorTitle", "请求参数有误");
-        model.addAttribute("errorMessage", "请检查文章链接或分页参数，每页文章数应为 1 到 100。");
+        model.addAttribute("errorMessage", "请检查文章链接或筛选参数。每页文章数应为 1 到 100，标题关键词和标签各不超过 50 个字符。");
         return "error";
     }
 }

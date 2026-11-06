@@ -19,7 +19,10 @@
                         <i class="fa fa-heart-o" aria-label="点赞数" th:text="${articleWithText.articleLikecount}"></i>
                         <i class="fa fa-comment-o" aria-label="评论数" th:text="${articleWithText.articleComment}"></i>
                     </p>
-                    <p class="card-text">标签：<span class="badge badge-default" th:text="${articleWithText.articleTag}">标签</span></p>
+                    <p class="card-text" th:if="${!#strings.isEmpty(articleWithText.articleTag)}">标签：
+                        <a class="badge badge-default" th:href="@{/(pageNum=1,tag=${articleWithText.articleTag})}"
+                           th:text="${articleWithText.articleTag}">标签</a>
+                    </p>
                 </header>
                 <div class="card-block post-content" th:utext="${articleWithText.articleText}">文章内容</div>
             </article>

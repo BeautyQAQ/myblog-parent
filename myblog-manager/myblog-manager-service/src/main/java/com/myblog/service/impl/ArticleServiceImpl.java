@@ -175,6 +175,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     private static String validTag(String tag) {
+        if (tag != null) tag = tag.strip();
         if (tag != null && tag.codePointCount(0, tag.length()) > 50) {
             throw new IllegalArgumentException("标签不能超过 50 个字符");
         }

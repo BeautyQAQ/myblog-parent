@@ -99,3 +99,31 @@ article img {
 #md {
 	height:400px;	
 }
+
+/* Native GET search remains usable without JavaScript. */
+.article-search {
+    margin-bottom: 1.5rem;
+}
+
+.article-search .form-control {
+    max-width: 100%;
+}
+
+.search-summary {
+    margin: 1rem 0;
+    overflow-wrap: anywhere;
+}
+
+.search-summary p {
+    margin-bottom: .5rem;
+}
+
+.article-tags {
+    margin-top: .75rem;
+    overflow-wrap: anywhere;
+}
+
+.article-tags a,
+.article-search option {
+    white-space: normal;
+}

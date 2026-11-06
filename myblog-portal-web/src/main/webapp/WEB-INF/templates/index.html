@@ -6,7 +6,49 @@
 <main class="container blog-content-container">
     <div class="row">
         <div class="col-md-8">
-            <div class="alert alert-info" th:if="${#lists.isEmpty(articleList)}">暂无文章</div>
+            <section class="article-search card card-block" aria-labelledby="article-search-title">
+                <h1 id="article-search-title" class="h4">查找文章</h1>
+                <form id="article-search-form" th:action="@{/}" method="get" role="search">
+                    <input type="hidden" name="pageNum" value="1">
+                    <input type="hidden" name="pageSize" th:value="${pageSize}">
+                    <input type="hidden" name="orderBy" th:value="${orderBy}">
+                    <div class="form-group">
+                        <label for="article-keyword">标题关键词</label>
+                        <input id="article-keyword" name="q" type="search" class="form-control" th:value="${keyword}"
+                               placeholder="输入标题中的文字" aria-describedby="article-search-hint">
+                    </div>
+                    <div class="form-group">
+                        <label for="article-tag">标签</label>
+                        <select id="article-tag" name="tag" class="form-control">
+                            <option value="">全部标签</option>
+                            <option th:if="${!#strings.isEmpty(selectedTag) and !#lists.contains(publishedTags, selectedTag)}"
+                                    th:value="${selectedTag}" th:text="${selectedTag}" selected>当前标签</option>
+                            <option th:each="tag : ${publishedTags}" th:value="${tag}" th:text="${tag}"
+                                    th:selected="${tag == selectedTag}">标签</option>
+                        </select>
+                    </div>
+                    <p id="article-search-hint" class="text-muted">按标题查找，可同时选择标签；关键词和标签各不超过 50 个字符。</p>
+                    <button type="submit" class="btn btn-primary">搜索</button>
+                    <a th:if="${hasFilters}" class="btn btn-link" th:href="@{/(pageNum=1,pageSize=${pageSize},orderBy=${orderBy})}">清除条件</a>
+                </form>
+            </section>
+            <div class="search-summary" role="status">
+                <p th:if="${hasFilters}">
+                    筛选条件：
+                    <span th:if="${!#strings.isEmpty(keyword)}">标题包含“<strong th:text="${keyword}">关键词</strong>”</span>
+                    <span th:if="${!#strings.isEmpty(selectedTag)}">标签为“<strong th:text="${selectedTag}">标签</strong>”</span>
+                </p>
+                <p><span th:text="${hasFilters ? '匹配文章：' : '全部文章：'}">全部文章：</span><strong th:text="${total}">0</strong> 篇</p>
+            </div>
+            <div class="alert alert-info" th:if="${#lists.isEmpty(articleList) and total == 0 and !hasFilters}">暂无文章</div>
+            <div class="alert alert-info" th:if="${#lists.isEmpty(articleList) and total == 0 and hasFilters}">
+                <p>没有找到符合条件的文章，请调整关键词或标签。</p>
+                <a th:href="@{/(pageNum=1,pageSize=${pageSize},orderBy=${orderBy})}">清除筛选条件，查看全部文章</a>
+            </div>
+            <div class="alert alert-info" th:if="${#lists.isEmpty(articleList) and total > 0}">
+                <p>当前页没有文章。</p>
+                <a th:href="@{/(pageNum=1,pageSize=${pageSize},orderBy=${orderBy},q=${keyword},tag=${selectedTag})}">返回第一页</a>
+            </div>
             <article class="card mb-4" th:each="item : ${articleList}">
                 <div class="card-block">
                     <h2 class="card-title">
@@ -14,6 +56,10 @@
                         <a th:href="@{/blogs(articleId=${item.articleId})}" class="card-link" th:text="${item.articleTitle}">文章标题</a>
                     </h2>
                     <div class="card-text" th:text="${articleSummaries[item.articleId]}">文章摘要</div>
+                    <p th:if="${!#strings.isEmpty(item.articleTag)}" class="article-tags">
+                        标签：<a class="badge badge-default" th:href="@{/(pageNum=1,pageSize=${pageSize},orderBy=${orderBy},q=${keyword},tag=${item.articleTag})}"
+                              th:text="${item.articleTag}">标签</a>
+                    </p>
                     <p class="card-text">
                         <span>管理员</span>
                         <span th:text="${'发表于 ' + #dates.format(item.publishedAt != null ? item.publishedAt : item.created, 'yyyy-MM-dd HH:mm:ss')}">发布时间</span>
@@ -26,22 +72,22 @@
             <nav th:if="${pages > 0}" aria-label="文章分页">
                 <ul class="pagination">
                     <li class="page-item" th:classappend="${!hasPreviousPage} ? 'disabled'">
-                        <a th:if="${hasPreviousPage}" class="page-link" th:href="@{/(pageNum=1,pageSize=${pageSize},orderBy=${orderBy})}">首页</a>
+                        <a th:if="${hasPreviousPage}" class="page-link" th:href="@{/(pageNum=1,pageSize=${pageSize},orderBy=${orderBy},q=${keyword},tag=${selectedTag})}">首页</a>
                         <span th:unless="${hasPreviousPage}" class="page-link">首页</span>
                     </li>
                     <li class="page-item" th:classappend="${!hasPreviousPage} ? 'disabled'">
-                        <a th:if="${hasPreviousPage}" class="page-link" aria-label="上一页" th:href="@{/(pageNum=${pageNum - 1},pageSize=${pageSize},orderBy=${orderBy})}">&laquo;</a>
+                        <a th:if="${hasPreviousPage}" class="page-link" aria-label="上一页" th:href="@{/(pageNum=${pageNum - 1},pageSize=${pageSize},orderBy=${orderBy},q=${keyword},tag=${selectedTag})}">&laquo;</a>
                         <span th:unless="${hasPreviousPage}" class="page-link" aria-label="上一页">&laquo;</span>
                     </li>
                     <li th:each="number : ${navigatepageNums}" class="page-item" th:classappend="${number == pageNum} ? 'active'">
-                        <a class="page-link" th:href="@{/(pageNum=${number},pageSize=${pageSize},orderBy=${orderBy})}" th:text="${number}">1</a>
+                        <a class="page-link" th:href="@{/(pageNum=${number},pageSize=${pageSize},orderBy=${orderBy},q=${keyword},tag=${selectedTag})}" th:text="${number}">1</a>
                     </li>
                     <li class="page-item" th:classappend="${!hasNextPage} ? 'disabled'">
-                        <a th:if="${hasNextPage}" class="page-link" aria-label="下一页" th:href="@{/(pageNum=${pageNum + 1},pageSize=${pageSize},orderBy=${orderBy})}">&raquo;</a>
+                        <a th:if="${hasNextPage}" class="page-link" aria-label="下一页" th:href="@{/(pageNum=${pageNum + 1},pageSize=${pageSize},orderBy=${orderBy},q=${keyword},tag=${selectedTag})}">&raquo;</a>
                         <span th:unless="${hasNextPage}" class="page-link" aria-label="下一页">&raquo;</span>
                     </li>
                     <li class="page-item" th:classappend="${!hasNextPage} ? 'disabled'">
-                        <a th:if="${hasNextPage}" class="page-link" th:href="@{/(pageNum=${pages},pageSize=${pageSize},orderBy=${orderBy})}">末页</a>
+                        <a th:if="${hasNextPage}" class="page-link" th:href="@{/(pageNum=${pages},pageSize=${pageSize},orderBy=${orderBy},q=${keyword},tag=${selectedTag})}">末页</a>
                         <span th:unless="${hasNextPage}" class="page-link">末页</span>
                     </li>
                 </ul>

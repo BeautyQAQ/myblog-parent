@@ -46,6 +46,29 @@ class ArticleLifecycleTest {
     }
 
     @Test
+    void normalizesTagWhitespaceOnCreationAndEditingForExactSearch() {
+        TbArticle submitted = article();
+        submitted.setArticleTag("\u2003Java\u2003");
+        var create = service((name, args) -> {
+            assertEquals("Java", ((TbArticle) args[0]).getArticleTag());
+            return 1;
+        }, new AtomicInteger());
+        create.addArticle(submitted);
+        TbArticle existing = article();
+        existing.setArticleId(7);
+        existing.setArticleStatus("PUBLISHED");
+        var update = service((name, args) -> {
+            if (name.equals("selectByPrimaryKey")) return existing;
+            assertEquals("Java", ((TbArticle) args[0]).getArticleTag());
+            return 1;
+        }, new AtomicInteger());
+        TbArticle patch = new TbArticle();
+        patch.setArticleId(7);
+        patch.setArticleTag("\u2003Java\u2003");
+        update.updateArticle(patch);
+    }
+
+    @Test
     void publishingANewArticleSetsItsPublicationTime() {
         TbArticle article = article();
         article.setArticleStatus("PUBLISHED");
