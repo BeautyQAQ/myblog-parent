@@ -23,6 +23,8 @@ import java.util.List;
 @Service
 public class ArticlePageServiceImpl implements ArticlePageService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ArticlePageServiceImpl.class);
+    // Interactions are frequent: bound list/ranking staleness without invalidating every search per view.
+    private static final int STATISTICS_CACHE_SECONDS = 30;
 
     private final TbArticleMapper articleMapper;
     private final JedisClient jedisClient;
@@ -95,7 +97,7 @@ public class ArticlePageServiceImpl implements ArticlePageService {
         if (cacheKey != null) {
             try {
                 // SETEX keeps the value and its expiry atomic, including during Redis failures.
-                jedisClient.setex(cacheKey, cacheExpire, JsonUtils.objectToJson(result));
+                jedisClient.setex(cacheKey, Math.min(cacheExpire, STATISTICS_CACHE_SECONDS), JsonUtils.objectToJson(result));
             } catch (RuntimeException e) {
                 LOGGER.warn("Unable to cache article page {}", cacheKey, e);
             }
@@ -135,8 +137,8 @@ public class ArticlePageServiceImpl implements ArticlePageService {
 
     private String cacheNamespace() {
         String version = jedisClient.get(cachePrefix + ":version");
-        // New search pages include totals and filters, so pre-search cached DTOs are never reused.
-        return cachePrefix + ":published:search:v" + (version == null ? "0" : version);
+        // Do not reuse pre-interaction pages, which may have a much longer TTL.
+        return cachePrefix + ":published:interactions:search:v" + (version == null ? "0" : version);
     }
 
     private static String normalizeFilter(String value) {

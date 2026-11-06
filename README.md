@@ -7,13 +7,21 @@
 
 ## 项目介绍
 
-项目将 Web 页面与业务服务拆成独立工程。后台提供文章管理，前台提供文章列表、详情、标题搜索与标签筛选，SSO 工程包含注册、登录与 token 查询。评论、点赞、浏览量和热度等功能仍属于后续完善方向。
+项目将 Web 页面与业务服务拆成独立工程。后台提供文章管理与评论审核，前台提供文章列表、详情、标题搜索与标签筛选，SSO 工程包含注册、登录与 token 查询。已支持阅读去重、登录点赞 / 取消点赞、真实热度排序，以及先审核后公开的评论。
 
-博客核心功能已加入管理员登录与后台保护、退出、草稿 / 发布 / 下架、后台预览、正文清洗和友好 404。公开注册默认普通用户，需明确指定管理员才能管理文章。升级现有环境先执行 V3、V4 数据迁移，管理员初始化与功能说明见 [博客核心功能](docs/core-features.md)。
+博客核心功能已加入管理员登录与后台保护、退出、草稿 / 发布 / 下架、后台预览、正文清洗和友好 404。公开注册默认普通用户，需明确指定管理员才能管理文章。升级现有环境先执行尚未应用的 V3、V4、V5、V6 数据迁移，管理员初始化与功能说明见 [博客核心功能](docs/core-features.md)。
 
 核心功能改造已完成 JDK 21 下 16 模块 clean install、91 项测试、六个 WAR 的 29 项真实 HTTP 检查，以及 Chrome 完整写作与退出流程验证。
 
-基本内容检索已完成标题关键词与整标签组合筛选、条件保留的分页 / 排序、匹配总数和无结果提示。当前全仓 115 项测试通过，另完成 21 项真实检索检查及 Chrome 操作验证；本轮无需新数据迁移。使用说明见 [内容检索](docs/core-features.md#内容检索)。
+文章互动已实现同一访客 30 分钟阅读去重、同一账号幂等点赞 / 取消点赞，热度为阅读量 + 点赞数 × 5。详情即时显示互动结果，列表与最热排序缓存最多 30 秒。升级需执行 [V5](db/migration/V5__article_interactions.sql)，详见 [阅读与点赞](docs/core-features.md#阅读与点赞)。
+
+阅读与点赞改造时 JDK 21 全仓 16 模块构建、141 项自动测试通过；互动功能另完成两轮共 35 项真实 HTTP 检查、6 项 JavaScript 行为检查及应用内浏览器登录 / 点赞 / 取消 / 刷新 / 退出验证。临时测试数据已清理。
+
+评论支持登录提交、查看本人审核状态和删除本人评论；后台提供状态 / 文章筛选、分页及通过 / 拒绝 / 删除操作。前台只公开已通过评论，重复提交和重复审核不会重复计数。升级需执行 [V6](db/migration/V6__article_comments.sql)，详见 [评论与后台审核](docs/core-features.md#评论与后台审核)。
+
+当前评论版本已通过 JDK 21 下 16 模块构建、178 项自动测试、43 项真实 HTTP 检查、15 项 JavaScript 行为检查，以及应用内浏览器提交 / 审核 / 公开展示 / 拒绝撤下流程验证。NAS 环境已应用 V6，临时测试数据已清理。
+
+基本内容检索已完成标题关键词与整标签组合筛选、条件保留的分页 / 排序、匹配总数和无结果提示。检索改造时全仓 115 项测试通过，另完成 21 项真实检索检查及 Chrome 操作验证；检索功能本身无需新数据迁移。使用说明见 [内容检索](docs/core-features.md#内容检索)。
 
 main 使用 Spring MVC、Thymeleaf、MyBatis 和 Dubbo 独立服务。门户、后台与登录注册页面由 Java 服务端渲染，模板与静态资源随 WAR 部署，无需独立前端工程或 Node.js 运行环境。MySQL 存储业务数据，Redis 提供文章缓存和登录会话，Kafka 传递文章变更后的缓存失效事件。图片以 MEDIUMBLOB 保存在 MySQL，通过 manager-web 的 /images/{id} 接口读取。Dubbo 使用可配置地址直连，应用不依赖 ZooKeeper 或 ActiveMQ。
 
@@ -44,7 +52,7 @@ mvn clean install
 
 切换其他环境时，可使用 [myblog-local.example.properties](myblog-local.example.properties) 作为可选覆盖模板，并通过 MYBLOG_CONFIG_LOCATION 指向外部文件，例如 file:/绝对路径/myblog-local.properties。使用仓库默认环境时无需复制模板或设置该变量。
 
-新环境先对独立 myblog 库按顺序执行 [V1](db/migration/V1__initial_schema.sql)、[V2](db/migration/V2__images.sql)、[V3](db/migration/V3__account_security.sql)、[V4](db/migration/V4__article_lifecycle.sql)，并预创建 Kafka topic；这些步骤不会由应用自动执行。当前 NAS 环境已完成四次迁移。已有 V1、V2 的环境只执行 V3、V4，各脚本只执行一次。原始 [myblog.sql](myblog.sql) 作为历史资料保留，详见升级说明。
+新环境先对独立 myblog 库按顺序执行 [V1](db/migration/V1__initial_schema.sql)、[V2](db/migration/V2__images.sql)、[V3](db/migration/V3__account_security.sql)、[V4](db/migration/V4__article_lifecycle.sql)、[V5](db/migration/V5__article_interactions.sql)、[V6](db/migration/V6__article_comments.sql)，并预创建 Kafka topic；这些步骤不会由应用自动执行。当前 NAS 环境已完成六次迁移。已有环境只执行尚未应用的迁移，各脚本只执行一次。原始 [myblog.sql](myblog.sql) 作为历史资料保留，详见升级说明。
 
 从仓库根目录，在**独立终端**按以下顺序启动六个 WAR。每个终端都需设置 JDK 21：
 

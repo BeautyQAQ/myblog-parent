@@ -240,7 +240,7 @@ class ArticleSearchServiceTest {
                     }
                     case "setex" -> {
                         writes++;
-                        assertEquals(300, args[1]);
+                        assertEquals(((String) args[0]).endsWith(":tags") ? 300 : 30, args[1]);
                         if (failWrites) throw new IllegalStateException("Redis write unavailable");
                         values.put((String) args[0], (String) args[2]);
                         yield "OK";

@@ -55,5 +55,6 @@
 	<dubbo:registry address="N/A"/>
 		<dubbo:reference interface="com.myblog.sso.service.TokenService" id="tokenService" url="${dubbo.sso.url}" check="false" retries="0" timeout="10000"/>
 	<dubbo:reference interface="com.myblog.service.ArticleService" id="articleService" url="${dubbo.manager.url}" check="false" retries="0" timeout="45000"/>
+	<dubbo:reference interface="com.myblog.service.CommentService" id="commentService" url="${dubbo.manager.url}" check="false" retries="0" timeout="45000"/>
 	<dubbo:reference interface="com.myblog.service.ImageService" id="imageService" url="${dubbo.manager.url}" check="false" retries="0" timeout="10000"/>
 </beans>

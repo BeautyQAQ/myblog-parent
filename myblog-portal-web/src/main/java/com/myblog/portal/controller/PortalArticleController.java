@@ -4,7 +4,14 @@ import com.myblog.pojo.TbArticle;
 import com.myblog.common.content.ArticleHtmlSanitizer;
 import com.myblog.portal.pojo.ArticleResult;
 import com.myblog.portal.service.ArticlePageService;
+import com.myblog.portal.service.ArticleInteractionService;
+import com.myblog.portal.pojo.ArticleInteraction;
+import com.myblog.pojo.TbUser;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.jsoup.Jsoup;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.stereotype.Controller;
@@ -17,13 +24,21 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Controller
 public class PortalArticleController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PortalArticleController.class);
     private final ArticlePageService articlePageService;
+    private final ArticleInteractionService interactionService;
+    private final String portalPublicBaseUrl;
 
-    public PortalArticleController(ArticlePageService articlePageService) {
+    public PortalArticleController(ArticlePageService articlePageService, ArticleInteractionService interactionService,
+                                   @Value("${portal.public-base-url:http://localhost:8082}") String portalPublicBaseUrl) {
         this.articlePageService = articlePageService;
+        this.interactionService = interactionService;
+        this.portalPublicBaseUrl = portalPublicBaseUrl.replaceAll("/+$", "");
     }
 
     @ModelAttribute
@@ -36,20 +51,49 @@ public class PortalArticleController {
 
     @GetMapping("/blogs")
     public String getArticleWithText(@RequestParam("articleId") Integer articleId, Model model,
-                                     HttpServletResponse response) {
+                                     HttpServletRequest request, HttpServletResponse response) {
+        response.setHeader("Cache-Control", "private, no-store");
         if (articleId < 1) {
             throw new IllegalArgumentException("articleId must be positive");
         }
         TbArticle article = articlePageService.getArticleWithText(articleId);
         if (article == null) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            model.addAttribute("errorTitle", "文章不存在");
-            model.addAttribute("errorMessage", "这篇文章尚未发布、已下架或已被删除。");
-            return "error";
+            return missingArticle(model, response);
+        }
+        model.addAttribute("interactionAvailable", false);
+        model.addAttribute("articleLiked", false);
+        String destination = portalPublicBaseUrl + "/blogs?articleId=" + articleId;
+        model.addAttribute("articleLoginUrl", model.getAttribute("ssoPublicBaseUrl") + "/page/login?redirect="
+                + URLEncoder.encode(destination, StandardCharsets.UTF_8));
+        // An uncertain account identity must not silently become an anonymous view or an unliked state.
+        if (!Boolean.TRUE.equals(model.getAttribute("authenticationUnavailable"))) {
+            TbUser user = model.getAttribute("currentUser") instanceof TbUser current ? current : null;
+            Long userId = user == null ? null : user.getId();
+            try {
+                ArticleInteraction interaction = "HEAD".equals(request.getMethod())
+                        ? interactionService.getInteraction(articleId, userId)
+                        : interactionService.recordView(articleId,
+                                PortalVisitorIdentity.key(request, response, userId), userId);
+                if (interaction == null) return missingArticle(model, response);
+                article.setArticlePageviews(interaction.getPageviews());
+                article.setArticleLikecount(interaction.getLikeCount());
+                article.setArticleHeat(interaction.getHeat());
+                model.addAttribute("articleLiked", interaction.isLiked());
+                model.addAttribute("interactionAvailable", true);
+            } catch (RuntimeException e) {
+                LOGGER.warn("Unable to load article interaction for article {}", articleId);
+            }
         }
         article.setArticleText(ArticleHtmlSanitizer.cleanForDisplay(article.getArticleText()));
         model.addAttribute("articleWithText", article);
         return "blog";
+    }
+
+    private static String missingArticle(Model model, HttpServletResponse response) {
+        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        model.addAttribute("errorTitle", "文章不存在");
+        model.addAttribute("errorMessage", "这篇文章尚未发布、已下架或已被删除。");
+        return "error";
     }
 
     @GetMapping("/")

@@ -25,7 +25,7 @@ class ArticlePageServiceImplTest {
             new Class<?>[]{JedisClient.class}, (proxy, method, args) -> switch (method.getName()) {
                 case "get" -> cache.get((String) args[0]);
                 case "setex" -> {
-                    assertEquals(300, args[1]);
+                    assertEquals(30, args[1]);
                     cache.put((String) args[0], (String) args[2]);
                     yield "OK";
                 }

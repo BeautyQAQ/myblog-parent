@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" th:content="${csrfToken}">
+    <title>评论审核</title>
+    <link rel="stylesheet" th:href="@{/resources/bootstrap-3.3.7-dist/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/comment-admin.css}">
+</head>
+<body id="comment-admin" th:attr="data-list-url=@{/comment/list},data-action-url=@{/comment/},data-page=${pageNum},data-page-size=${pageSize}">
+<main class="container-fluid comment-admin">
+    <nav aria-label="后台功能"><a th:href="@{/article_admin}">文章管理</a> <span aria-hidden="true"> / </span> 评论审核</nav>
+    <h1>评论审核</h1>
+    <p class="text-muted">评论通过审核后才会公开。拒绝或删除已公开评论会同步减少评论数；已删除的评论不能恢复。</p>
+    <form id="comment-filter" class="comment-filter" th:action="@{/comment_admin}" method="get">
+        <div class="form-group">
+            <label for="comment-status">审核状态</label>
+            <select id="comment-status" name="status" class="form-control">
+                <option value="PENDING" th:selected="${selectedStatus == 'PENDING'}">待审核</option>
+                <option value="APPROVED" th:selected="${selectedStatus == 'APPROVED'}">已通过</option>
+                <option value="REJECTED" th:selected="${selectedStatus == 'REJECTED'}">已拒绝</option>
+                <option value="DELETED" th:selected="${selectedStatus == 'DELETED'}">已删除</option>
+                <option value="ALL" th:selected="${selectedStatus == 'ALL'}">全部状态</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="comment-article">文章编号（选填）</label>
+            <input id="comment-article" name="articleId" type="number" min="1" max="2147483647"
+                   step="1" class="form-control" th:value="${selectedArticleId}" placeholder="全部文章">
+        </div>
+        <button type="submit" class="btn btn-primary">筛选</button>
+        <button id="comment-refresh" type="button" class="btn btn-default">刷新列表</button>
+    </form>
+    <p id="comment-message" role="status" aria-live="polite"></p>
+    <p id="comment-summary" class="text-muted"></p>
+    <div id="comment-list" aria-busy="false" aria-label="审核列表"></div>
+    <nav aria-label="评论分页" class="comment-pagination">
+        <button id="comment-previous" type="button" class="btn btn-default" disabled>上一页</button>
+        <span id="comment-page"></span>
+        <button id="comment-next" type="button" class="btn btn-default" disabled>下一页</button>
+    </nav>
+    <noscript><p class="alert alert-info">请启用 JavaScript 后查看和审核评论。</p></noscript>
+</main>
+<script th:src="@{/js/comment-admin.js}"></script>
+</body>
+</html>

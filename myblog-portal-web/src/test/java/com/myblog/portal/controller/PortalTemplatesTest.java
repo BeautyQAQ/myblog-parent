@@ -10,6 +10,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import com.myblog.portal.pojo.ArticleResult;
 import com.myblog.portal.service.ArticlePageService;
+import com.myblog.portal.service.ArticleInteractionService;
+import com.myblog.portal.pojo.ArticleInteraction;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +43,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
@@ -49,6 +52,7 @@ class PortalTemplatesTest {
     private MockMvc mvc;
     private final StubArticlePageService service = new StubArticlePageService();
     private final StubTokenService tokens = new StubTokenService();
+    private final StubInteractionService interactions = new StubInteractionService();
 
     @BeforeEach
     void setUp() throws Exception {
@@ -56,6 +60,11 @@ class PortalTemplatesTest {
         context.setServletContext(new MockServletContext("src/main/webapp", new FileSystemResourceLoader()));
         context.registerBean("articlePageService", ArticlePageService.class, () -> service);
         context.registerBean("tokenService", TokenService.class, () -> tokens);
+        context.registerBean("articleInteractionService", ArticleInteractionService.class, () -> interactions);
+        context.registerBean("commentService", com.myblog.service.CommentService.class,
+                () -> (com.myblog.service.CommentService) java.lang.reflect.Proxy.newProxyInstance(
+                        getClass().getClassLoader(), new Class<?>[]{com.myblog.service.CommentService.class},
+                        (proxy, method, args) -> null));
         new XmlBeanDefinitionReader(context).loadBeanDefinitions(mvcXmlWithoutDubbo());
         context.refresh();
         mvc = webAppContextSetup(context).build();
@@ -66,6 +75,26 @@ class PortalTemplatesTest {
         if (context != null) {
             context.close();
         }
+    }
+
+    @Test
+    void commentWidgetsUseContextPathsAndOnlyOfferAuthorControlsToSignedInReaders() throws Exception {
+        var anonymous = Jsoup.parse(mvc.perform(get("/blog/blogs").contextPath("/blog")
+                .param("articleId", "42")).andReturn().getResponse().getContentAsString());
+        assertEquals("/blog/articles/42/comments", anonymous.selectFirst("#article-comments").attr("data-public-url"));
+        assertEquals("/blog/comments/", anonymous.selectFirst("#article-comments").attr("data-delete-base"));
+        assertNotNull(anonymous.selectFirst("#comment-login"));
+        assertNull(anonymous.selectFirst("#comment-form"));
+        assertNull(anonymous.selectFirst("#my-comments"));
+        assertNotNull(anonymous.selectFirst("script[src='/blog/js/article-comments.js']"));
+        signedIn();
+        var member = Jsoup.parse(mvc.perform(get("/blog/blogs").contextPath("/blog")
+                .param("articleId", "42").cookie(new Cookie(SessionSecurity.TOKEN_COOKIE, "signed-in-token")))
+                .andReturn().getResponse().getContentAsString());
+        assertEquals("/blog/articles/42/comments", member.selectFirst("#comment-form").attr("action"));
+        assertEquals("/blog/articles/42/comments/mine", member.selectFirst("#my-comments").attr("data-url"));
+        assertNull(member.selectFirst("#comment-login"));
+        assertNotNull(member.selectFirst("#comment-content"));
     }
 
     @Test
@@ -390,6 +419,245 @@ class PortalTemplatesTest {
         assertTrue(document.selectFirst(".search-summary").text().contains(tag));
         assertFalse(html.contains("<img src=x onerror=alert(1)>"));
         assertTrue(document.select("[onerror]").isEmpty());
+    }
+
+    @Test
+    void headReadsDoNotCountAViewOrIssueAVisitorCookie() throws Exception {
+        MockHttpServletResponse response = mvc.perform(head("/blogs").param("articleId", "42"))
+                .andReturn().getResponse();
+        assertEquals(200, response.getStatus());
+        assertEquals(0, interactions.views);
+        assertNull(response.getCookie(PortalVisitorIdentity.COOKIE_NAME));
+    }
+
+    @Test
+    void anonymousArticleReadingUsesAStableContextScopedPrivateCookieAndFreshCounters() throws Exception {
+        MockHttpServletResponse first = mvc.perform(get("/blog/blogs").contextPath("/blog").secure(true)
+                .param("articleId", "42")).andReturn().getResponse();
+        Cookie visitor = first.getCookie(PortalVisitorIdentity.COOKIE_NAME);
+        assertNotNull(visitor);
+        assertTrue(visitor.isHttpOnly());
+        assertTrue(visitor.getSecure());
+        assertEquals("Lax", visitor.getAttribute("SameSite"));
+        assertEquals("/blog", visitor.getPath());
+        assertEquals(365 * 24 * 60 * 60, visitor.getMaxAge());
+        assertEquals("private, no-store", first.getHeader("Cache-Control"));
+        assertTrue(interactions.visitorKey.matches("[0-9a-f]{64}"));
+        String firstKey = interactions.visitorKey;
+        assertNull(interactions.userId);
+        var document = Jsoup.parse(first.getContentAsString());
+        assertEquals("13", document.selectFirst("#article-pageviews").text());
+        assertEquals("3", document.selectFirst("#article-like-count").text());
+        assertNull(document.selectFirst("#article-like-button"));
+        assertEquals("http://localhost:8082/blogs?articleId=42",
+                queryParameters(document.selectFirst("#article-like-login")).get("redirect"));
+        MockHttpServletResponse second = mvc.perform(get("/blog/blogs").contextPath("/blog")
+                .cookie(visitor).param("articleId", "42")).andReturn().getResponse();
+        assertEquals(firstKey, interactions.visitorKey);
+        assertNull(second.getCookie(PortalVisitorIdentity.COOKIE_NAME));
+        assertEquals(0, tokens.reads);
+    }
+
+    @Test
+    void aMalformedVisitorCookieIsReplacedAndNeverUsedAsAnAccountIdentity() throws Exception {
+        MockHttpServletResponse response = mvc.perform(get("/blogs").param("articleId", "42")
+                .cookie(new Cookie(PortalVisitorIdentity.COOKIE_NAME, "user:999")))
+                .andReturn().getResponse();
+        Cookie replacement = response.getCookie(PortalVisitorIdentity.COOKIE_NAME);
+        assertNotNull(replacement);
+        assertEquals("/", replacement.getPath());
+        assertFalse(replacement.getSecure());
+        assertNull(interactions.userId);
+        assertTrue(interactions.visitorKey.matches("[0-9a-f]{64}"));
+    }
+
+    @Test
+    void loggedInReadingUsesTheVerifiedAccountAndRendersItsActualLikeState() throws Exception {
+        signedIn();
+        interactions.liked = true;
+        MockHttpServletResponse response = mvc.perform(get("/blog/blogs").contextPath("/blog")
+                .param("articleId", "42").param("userId", "999")
+                .cookie(new Cookie(SessionSecurity.TOKEN_COOKIE, "signed-in-token")))
+                .andReturn().getResponse();
+        assertEquals(7L, interactions.userId);
+        String accountKey = interactions.visitorKey;
+        assertNull(response.getCookie(PortalVisitorIdentity.COOKIE_NAME));
+        var document = Jsoup.parse(response.getContentAsString());
+        Element button = document.selectFirst("#article-like-button");
+        assertEquals("true", button.attr("aria-pressed"));
+        assertEquals("取消点赞", button.text());
+        assertEquals("/blog/articles/42/like", button.attr("data-url"));
+        assertFalse(button.hasAttr("disabled"));
+        assertNull(document.selectFirst("#article-like-login"));
+        mvc.perform(get("/blogs").param("articleId", "42")
+                .cookie(new Cookie(SessionSecurity.TOKEN_COOKIE, "another-valid-token"),
+                        new Cookie(PortalVisitorIdentity.COOKIE_NAME, "00000000-0000-0000-0000-000000000001")));
+        assertEquals(accountKey, interactions.visitorKey);
+    }
+
+    @Test
+    void failedStatisticsPreserveReadingAndDoNotRenderAnUnlikedState() throws Exception {
+        signedIn();
+        interactions.unavailable = true;
+        MockHttpServletResponse response = mvc.perform(get("/blogs").param("articleId", "42")
+                .cookie(new Cookie(SessionSecurity.TOKEN_COOKIE, "signed-in-token")))
+                .andReturn().getResponse();
+        assertEquals(200, response.getStatus());
+        var document = Jsoup.parse(response.getContentAsString());
+        assertTrue(document.selectFirst(".post-content").text().contains("正文"));
+        Element button = document.selectFirst("#article-like-button");
+        assertTrue(button.hasAttr("disabled"));
+        assertFalse(button.hasAttr("aria-pressed"));
+        assertTrue(document.selectFirst("#article-interaction-message").text().contains("无法确认"));
+    }
+
+    @Test
+    void failedAccountResolutionDoesNotCountALoggedInReaderAsAnAnonymousVisitor() throws Exception {
+        tokens.unavailable = true;
+        MockHttpServletResponse response = mvc.perform(get("/blogs").param("articleId", "42")
+                .cookie(new Cookie(SessionSecurity.TOKEN_COOKIE, "signed-in-token")))
+                .andReturn().getResponse();
+        assertEquals(200, response.getStatus());
+        assertEquals(0, interactions.views);
+        assertNull(response.getCookie(PortalVisitorIdentity.COOKIE_NAME));
+        var document = Jsoup.parse(response.getContentAsString());
+        assertNull(document.selectFirst("#article-like-login"));
+        assertTrue(document.selectFirst("#article-interaction-message").text().contains("无法确认"));
+    }
+
+    @Test
+    void hiddenArticlesNeverCountViewsAndAConcurrentUnpublishBecomes404() throws Exception {
+        service.missing = true;
+        assertEquals(404, mvc.perform(get("/blogs").param("articleId", "42"))
+                .andReturn().getResponse().getStatus());
+        assertEquals(0, interactions.views);
+        service.missing = false;
+        interactions.missing = true;
+        assertEquals(404, mvc.perform(get("/blogs").param("articleId", "42"))
+                .andReturn().getResponse().getStatus());
+    }
+
+    @Test
+    void likingRequiresALoginAndValidCsrfWithoutCallingTheInteractionService() throws Exception {
+        assertEquals(401, mvc.perform(post("/articles/42/like").param("liked", "true"))
+                .andReturn().getResponse().getStatus());
+        signedIn();
+        for (String csrf : List.of("", "forged")) {
+            assertEquals(403, mvc.perform(post("/articles/42/like").param("liked", "true")
+                    .cookie(new Cookie(SessionSecurity.TOKEN_COOKIE, "signed-in-token"))
+                    .header("X-CSRF-Token", csrf)).andReturn().getResponse().getStatus());
+        }
+        assertEquals(0, interactions.writes);
+        tokens.user = null;
+        assertEquals(401, mvc.perform(post("/articles/42/like").param("liked", "true")
+                .cookie(new Cookie(SessionSecurity.TOKEN_COOKIE, "signed-in-token"))
+                .header("X-CSRF-Token", SessionSecurity.csrfToken("signed-in-token")))
+                .andReturn().getResponse().getStatus());
+        assertEquals(0, interactions.writes);
+    }
+
+    @Test
+    void likingUsesTheVerifiedUserAndExplicitDesiredStateAndReturnsFreshCounts() throws Exception {
+        signedIn();
+        int requests = 0;
+        for (boolean desired : new boolean[]{true, true, false, false}) {
+            MockHttpServletResponse response = mvc.perform(post("/blog/articles/42/like").contextPath("/blog")
+                    .param("liked", Boolean.toString(desired)).param("userId", "999")
+                    .cookie(new Cookie(SessionSecurity.TOKEN_COOKIE, "signed-in-token"))
+                    .header("X-CSRF-Token", SessionSecurity.csrfToken("signed-in-token")))
+                    .andReturn().getResponse();
+            assertEquals(200, response.getStatus());
+            assertEquals(7L, interactions.userId);
+            assertEquals(desired, interactions.liked);
+            assertTrue(response.getContentAsString().contains("\"liked\":" + desired));
+            assertTrue(response.getContentAsString().contains("\"likeCount\":3"));
+            assertEquals("private, no-store", response.getHeader("Cache-Control"));
+            assertEquals(++requests, tokens.reads, "Each like request should verify the account exactly once");
+        }
+    }
+
+    @Test
+    void missingArticlesAndServiceOutagesReturnUsefulLikeErrors() throws Exception {
+        signedIn();
+        interactions.missing = true;
+        assertEquals(404, likeResponse().getStatus());
+        interactions.missing = false;
+        interactions.unavailable = true;
+        MockHttpServletResponse failed = likeResponse();
+        assertEquals(503, failed.getStatus());
+        assertTrue(failed.getContentAsString().contains("重复提交不会重复计数"));
+        interactions.unavailable = false;
+        tokens.unavailable = true;
+        assertEquals(503, likeResponse().getStatus());
+    }
+
+    @Test
+    void malformedLikeParametersReturnJson400AndNeverWrite() throws Exception {
+        signedIn();
+        for (String[] params : List.of(new String[]{"42", ""}, new String[]{"42", "maybe"},
+                new String[]{"0", "true"}, new String[]{"oops", "true"})) {
+            MockHttpServletResponse response = mvc.perform(post("/articles/" + params[0] + "/like")
+                    .param("liked", params[1]).cookie(new Cookie(SessionSecurity.TOKEN_COOKIE, "signed-in-token"))
+                    .header("X-CSRF-Token", SessionSecurity.csrfToken("signed-in-token")))
+                    .andReturn().getResponse();
+            assertEquals(400, response.getStatus());
+            assertTrue(response.getContentType().contains("application/json"));
+        }
+        assertEquals(400, mvc.perform(post("/articles/42/like")).andReturn().getResponse().getStatus());
+        assertEquals(0, interactions.writes);
+    }
+
+    private MockHttpServletResponse likeResponse() throws Exception {
+        return mvc.perform(post("/articles/42/like").param("liked", "true")
+                .cookie(new Cookie(SessionSecurity.TOKEN_COOKIE, "signed-in-token"))
+                .header("X-CSRF-Token", SessionSecurity.csrfToken("signed-in-token")))
+                .andReturn().getResponse();
+    }
+
+    private void signedIn() {
+        tokens.user = new TbUser();
+        tokens.user.setId(7L);
+        tokens.user.setUsername("reader");
+        tokens.user.setRole("USER");
+    }
+
+    private static class StubInteractionService implements ArticleInteractionService {
+        private boolean unavailable;
+        private boolean missing;
+        private boolean liked;
+        private String visitorKey;
+        private Long userId;
+        private int views;
+        private int writes;
+
+        @Override
+        public ArticleInteraction recordView(int articleId, String visitorKey, Long userId) {
+            views++;
+            this.visitorKey = visitorKey;
+            this.userId = userId;
+            return getInteraction(articleId, userId);
+        }
+
+        @Override
+        public ArticleInteraction getInteraction(int articleId, Long userId) {
+            if (unavailable) throw new IllegalStateException("offline");
+            if (missing) return null;
+            ArticleInteraction result = new ArticleInteraction();
+            result.setArticleId(articleId);
+            result.setPageviews(13);
+            result.setLikeCount(3);
+            result.setHeat(28);
+            result.setLiked(liked);
+            return result;
+        }
+
+        @Override
+        public ArticleInteraction setLiked(int articleId, long userId, boolean liked) {
+            writes++;
+            this.userId = userId;
+            this.liked = liked;
+            return getInteraction(articleId, userId);
+        }
     }
 
     private static Map<String, String> queryParameters(Element link) {

@@ -15,9 +15,9 @@
                     <p class="card-text">
                         <span>管理员</span>
                         <span th:text="${'发表于 ' + #dates.format(articleWithText.publishedAt != null ? articleWithText.publishedAt : articleWithText.created, 'yyyy-MM-dd HH:mm:ss')}">发布时间</span>
-                        <i class="fa fa-eye" aria-label="浏览量" th:text="${articleWithText.articlePageviews}"></i>
-                        <i class="fa fa-heart-o" aria-label="点赞数" th:text="${articleWithText.articleLikecount}"></i>
-                        <i class="fa fa-comment-o" aria-label="评论数" th:text="${articleWithText.articleComment}"></i>
+                        <i id="article-pageviews" class="fa fa-eye" aria-label="浏览量" th:text="${articleWithText.articlePageviews}"></i>
+                        <i id="article-like-count" class="fa fa-heart-o" aria-label="点赞数" th:text="${articleWithText.articleLikecount}"></i>
+                        <i id="article-comment-count" class="fa fa-comment-o" aria-label="评论数" th:text="${articleWithText.articleComment}"></i>
                     </p>
                     <p class="card-text" th:if="${!#strings.isEmpty(articleWithText.articleTag)}">标签：
                         <a class="badge badge-default" th:href="@{/(pageNum=1,tag=${articleWithText.articleTag})}"
@@ -25,10 +25,59 @@
                     </p>
                 </header>
                 <div class="card-block post-content" th:utext="${articleWithText.articleText}">文章内容</div>
+                <section class="card-block article-interaction" aria-label="文章互动">
+                    <button th:if="${currentUser != null}" id="article-like-button" type="button"
+                            class="btn btn-outline-primary" th:classappend="${interactionAvailable and articleLiked} ? 'active'"
+                            th:attr="data-url=@{/articles/{id}/like(id=${articleWithText.articleId})},aria-pressed=${interactionAvailable ? articleLiked : null}"
+                            th:disabled="${!interactionAvailable}" th:text="${interactionAvailable ? (articleLiked ? '取消点赞' : '点赞') : '点赞暂不可用'}">点赞</button>
+                    <a th:if="${currentUser == null and !authenticationUnavailable}" id="article-like-login"
+                       class="btn btn-outline-primary" th:href="${articleLoginUrl}">登录后点赞</a>
+                    <p id="article-interaction-message" role="status" aria-live="polite" class="mt-2"
+                       th:text="${interactionAvailable ? '' : '互动状态暂时无法确认，请稍后刷新重试。'}"></p>
+                    <p class="text-muted interaction-hint">热度按阅读量 + 点赞数 × 5 计算；列表统计与最热排序最多延迟 30 秒更新。</p>
+                    <noscript><p>请启用 JavaScript 后操作点赞。</p></noscript>
+                </section>
             </article>
+            <section id="article-comments" class="card card-block mb-4" aria-labelledby="comments-title"
+                     th:attr="data-public-url=@{/articles/{id}/comments(id=${articleWithText.articleId})},data-delete-base=@{/comments/}">
+                <h2 id="comments-title" class="h4">评论</h2>
+                <p class="text-muted">评论审核通过后公开。请友善交流，每条最多 1000 个字符。</p>
+                <div class="comments-toolbar">
+                    <span id="comments-total" aria-live="polite"></span>
+                    <button id="comments-refresh" type="button" class="btn btn-link">刷新评论</button>
+                </div>
+                <p id="comments-message" role="status" aria-live="polite"></p>
+                <div id="comments-list" aria-live="polite"></div>
+                <nav id="comments-pagination" aria-label="公开评论分页"></nav>
+                <form th:if="${currentUser != null}" id="comment-form" method="post"
+                      th:action="@{/articles/{id}/comments(id=${articleWithText.articleId})}">
+                    <div class="form-group">
+                        <label for="comment-content">发表评论</label>
+                        <textarea id="comment-content" name="content" class="form-control" rows="4"
+                                  required aria-describedby="comment-input-hint"></textarea>
+                        <small id="comment-input-hint" class="text-muted">提交后进入待审核，内容以纯文本展示。</small>
+                    </div>
+                    <button id="comment-submit" type="submit" class="btn btn-primary" disabled>提交评论</button>
+                    <p id="comment-submit-message" role="status" aria-live="polite" class="mt-2"></p>
+                </form>
+                <a th:if="${currentUser == null and !authenticationUnavailable}" id="comment-login"
+                   class="btn btn-outline-primary" th:href="${articleLoginUrl}">登录后评论</a>
+                <p th:if="${authenticationUnavailable}" class="text-muted">暂时无法验证登录状态，请稍后刷新后发表评论。</p>
+                <section th:if="${currentUser != null}" id="my-comments" class="mt-4" aria-labelledby="my-comments-title"
+                         th:attr="data-url=@{/articles/{id}/comments/mine(id=${articleWithText.articleId})}">
+                    <h3 id="my-comments-title" class="h5">我的评论</h3>
+                    <p class="text-muted">这里可以查看审核状态；删除后评论不再公开。</p>
+                    <p id="my-comments-message" role="status" aria-live="polite"></p>
+                    <div id="my-comments-list" aria-live="polite"></div>
+                    <nav id="my-comments-pagination" aria-label="我的评论分页"></nav>
+                </section>
+                <noscript><p>请启用 JavaScript 查看、提交和管理评论。</p></noscript>
+            </section>
         </div>
     </div>
 </main>
 <th:block th:replace="~{fragments/layout :: footer}"></th:block>
+<script th:src="@{/js/article-interaction.js}"></script>
+<script th:src="@{/js/article-comments.js}"></script>
 </body>
 </html>

@@ -22,4 +22,5 @@
 	<!-- 声明需要暴露的服务接口 -->
 	<dubbo:service interface="com.myblog.service.ArticleService" ref="articleServiceImpl" timeout="600000"/>
 	<dubbo:service interface="com.myblog.service.ImageService" ref="imageServiceImpl" timeout="10000"/>
+	<dubbo:service interface="com.myblog.service.CommentService" ref="commentServiceImpl" timeout="45000" retries="0"/>
 </beans>

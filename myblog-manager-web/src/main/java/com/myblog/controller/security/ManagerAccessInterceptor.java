@@ -35,7 +35,8 @@ public class ManagerAccessInterceptor implements HandlerInterceptor {
         response.setHeader("X-Content-Type-Options", "nosniff");
         response.setHeader("X-Frame-Options", "SAMEORIGIN");
         String path = request.getRequestURI().substring(request.getContextPath().length());
-        String destination = managerBaseUrl + ("/article_admin".equals(path) ? path : "/");
+        boolean managementPage = "/".equals(path) || "/article_admin".equals(path) || "/comment_admin".equals(path);
+        String destination = managerBaseUrl + (managementPage ? path : "/");
         String loginUrl = ssoBaseUrl + "/page/login?redirect="
                 + URLEncoder.encode(destination, StandardCharsets.UTF_8);
         request.setAttribute("ssoLoginUrl", loginUrl);
@@ -54,7 +55,7 @@ public class ManagerAccessInterceptor implements HandlerInterceptor {
             }
         }
         if (user == null) {
-            if ("GET".equals(request.getMethod()) && ("/".equals(path) || "/article_admin".equals(path))) {
+            if ("GET".equals(request.getMethod()) && managementPage) {
                 response.sendRedirect(loginUrl);
             } else {
                 reject(response, 401, "请先登录");

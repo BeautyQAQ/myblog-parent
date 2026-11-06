@@ -33,6 +33,7 @@
                 </form>
             </section>
             <div class="search-summary" role="status">
+                <p class="text-muted" th:if="${orderBy == 'heat'}">按阅读量 + 点赞数 × 5 排序；统计与排序最多延迟 30 秒更新。</p>
                 <p th:if="${hasFilters}">
                     筛选条件：
                     <span th:if="${!#strings.isEmpty(keyword)}">标题包含“<strong th:text="${keyword}">关键词</strong>”</span>

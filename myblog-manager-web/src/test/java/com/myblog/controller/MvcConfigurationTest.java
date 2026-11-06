@@ -8,6 +8,8 @@ import com.myblog.sso.service.TokenService;
 import jakarta.servlet.http.Cookie;
 import com.myblog.service.ArticleService;
 import com.myblog.service.ImageService;
+import com.myblog.service.CommentService;
+import com.myblog.pojo.CommentPage;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ByteArrayResource;
@@ -68,6 +70,7 @@ class MvcConfigurationTest {
             assertTrue(html.contains("href=\"/manager/css/Site.css\""));
             assertTrue(html.contains("src=\"/manager/js/_layout.js\""));
             assertTrue(html.contains("<iframe src=\"/manager/article_admin\""));
+            assertTrue(html.contains("href=\"/manager/comment_admin\""));
             String avatarRule = html.lines().filter(line -> line.contains("background-image")).findFirst().orElse("");
             assertTrue(avatarRule.replace("\\", "").contains("/manager/resources/images/logo.png"), avatarRule);
             assertFalse(html.matches("(?s).*\\bth:[\\w-]+\\s*=.*"));
@@ -84,6 +87,7 @@ class MvcConfigurationTest {
             String html = response.getContentAsString(StandardCharsets.UTF_8);
             assertEquals(200, response.getStatus());
             assertTrue(html.contains("data-list-url=\"/manager/article/list\""));
+            assertTrue(html.contains("href=\"/manager/comment_admin\""));
             assertTrue(html.contains("data-delete-url=\"/manager/article/del/\""));
             assertTrue(html.contains("data-detail-url=\"/manager/article/get/\""));
             assertTrue(html.contains("data-add-url=\"/manager/article/add\""));
@@ -131,6 +135,16 @@ class MvcConfigurationTest {
                 public Result logout(String token) { return Result.ok(); }
             });
             context.registerBean("articleService", ArticleService.class, () -> stub);
+            context.registerBean("commentService", CommentService.class, () -> (CommentService) Proxy.newProxyInstance(
+                    CommentService.class.getClassLoader(), new Class<?>[]{CommentService.class}, (proxy, method, args) -> {
+                        if (method.getName().equals("getModerationQueue")) {
+                            CommentPage page = new CommentPage();
+                            page.setPageNum((int) args[2]);
+                            page.setPageSize((int) args[3]);
+                            return page;
+                        }
+                        throw new UnsupportedOperationException(method.getName());
+                    }));
             context.registerBean("imageService", ImageService.class, () -> new ImageService() {
                 @Override
                 public String saveImage(byte[] data) {

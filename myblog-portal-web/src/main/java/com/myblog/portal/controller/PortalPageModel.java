@@ -12,7 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
-@ControllerAdvice
+@ControllerAdvice(assignableTypes = PortalArticleController.class)
 public class PortalPageModel {
     private static final Logger LOGGER = LoggerFactory.getLogger(PortalPageModel.class);
     private final TokenService tokenService;
@@ -32,6 +32,7 @@ public class PortalPageModel {
         model.addAttribute("ssoPublicBaseUrl", ssoPublicBaseUrl);
         model.addAttribute("managerPublicBaseUrl", managerPublicBaseUrl);
         model.addAttribute("csrfToken", "");
+        model.addAttribute("authenticationUnavailable", false);
         String token = SessionSecurity.readToken(request);
         if (token == null || token.isBlank()) {
             return;
@@ -44,6 +45,7 @@ public class PortalPageModel {
                 model.addAttribute("csrfToken", SessionSecurity.csrfToken(token));
             }
         } catch (RuntimeException e) {
+            model.addAttribute("authenticationUnavailable", true);
             // Account service failures must not prevent visitors from reading public articles.
             LOGGER.warn("Unable to load the current portal user");
         }

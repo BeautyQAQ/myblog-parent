@@ -39,5 +39,7 @@
 	<dubbo:application name="myblog-portal-web" qos-enable="false"/>
 	<dubbo:registry address="N/A"/>
 	<dubbo:reference interface="com.myblog.portal.service.ArticlePageService" id="articlePageService"  url="${dubbo.portal.url}" check="false" timeout="10000"/>
+    <dubbo:reference interface="com.myblog.portal.service.ArticleInteractionService" id="articleInteractionService" url="${dubbo.portal.url}" check="false" timeout="5000" retries="0"/>
     <dubbo:reference interface="com.myblog.sso.service.TokenService" id="tokenService" url="${dubbo.sso.url}" check="false" timeout="2000" retries="0"/>
+    <dubbo:reference interface="com.myblog.service.CommentService" id="commentService" url="${dubbo.manager.url}" check="false" timeout="45000" retries="0"/>
 </beans>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.myblog.mapper.ArticleInteractionMapper">
+    <resultMap id="Counters" type="com.myblog.pojo.TbArticle">
+        <id column="article_id" property="articleId"/>
+        <result column="article_pageviews" property="articlePageviews"/>
+        <result column="article_likecount" property="articleLikecount"/>
+        <result column="article_heat" property="articleHeat"/>
+    </resultMap>
+    <!-- All interaction reads and writes lock this row first. Lifecycle changes use the same row lock. -->
+    <select id="selectPublishedForUpdate" resultMap="Counters">
+        SELECT article_id, article_pageviews, article_likecount, article_heat
+        FROM tb_article WHERE article_id = #{articleId,jdbcType=INTEGER} AND article_status = 'PUBLISHED'
+        FOR UPDATE
+    </select>
+    <select id="hasRecentView" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM tb_article_view
+        WHERE article_id = #{articleId,jdbcType=INTEGER} AND visitor_key = #{visitorKey,jdbcType=VARCHAR}
+          AND viewed_at &gt; CURRENT_TIMESTAMP(6) - INTERVAL 30 MINUTE)
+    </select>
+    <insert id="saveView">
+        INSERT INTO tb_article_view (article_id, visitor_key, viewed_at)
+        VALUES (#{articleId,jdbcType=INTEGER}, #{visitorKey,jdbcType=VARCHAR}, CURRENT_TIMESTAMP(6))
+        ON DUPLICATE KEY UPDATE viewed_at = CURRENT_TIMESTAMP(6)
+    </insert>
+    <update id="incrementViews">
+        UPDATE tb_article
+        SET article_heat = LEAST(2147483647,
+              LEAST(2147483647, GREATEST(COALESCE(article_pageviews, 0), 0) + 1)
+              + 5 * GREATEST(article_likecount, 0)),
+            article_pageviews = LEAST(2147483647, GREATEST(COALESCE(article_pageviews, 0), 0) + 1)
+        WHERE article_id = #{articleId,jdbcType=INTEGER} AND article_status = 'PUBLISHED'
+    </update>
+    <select id="hasLike" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM tb_article_like WHERE article_id = #{articleId,jdbcType=INTEGER} AND user_id = #{userId,jdbcType=BIGINT})
+    </select>
+    <insert id="insertLike">
+        INSERT INTO tb_article_like (article_id, user_id, created)
+        VALUES (#{articleId,jdbcType=INTEGER}, #{userId,jdbcType=BIGINT}, CURRENT_TIMESTAMP(6))
+    </insert>
+    <delete id="deleteLike">
+        DELETE FROM tb_article_like WHERE article_id = #{articleId,jdbcType=INTEGER} AND user_id = #{userId,jdbcType=BIGINT}
+    </delete>
+    <update id="changeLikeCount">
+        UPDATE tb_article
+        SET article_heat = LEAST(2147483647, GREATEST(COALESCE(article_pageviews, 0), 0)
+              + 5 * GREATEST(0, LEAST(2147483647, article_likecount + #{delta,jdbcType=INTEGER}))),
+            article_likecount = GREATEST(0, LEAST(2147483647, article_likecount + #{delta,jdbcType=INTEGER}))
+        WHERE article_id = #{articleId,jdbcType=INTEGER} AND article_status = 'PUBLISHED'
+    </update>
+</mapper>

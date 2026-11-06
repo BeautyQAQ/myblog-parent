@@ -21,4 +21,5 @@
 	<dubbo:protocol name="dubbo" host="${dubbo.host}" port="${dubbo.portal.port}" serialization="fastjson2" payload="10485760"/>
 	<!-- 声明需要暴露的服务接口 -->
 	<dubbo:service interface="com.myblog.portal.service.ArticlePageService" ref="articlePageServiceImpl" timeout="600000"/>
+    <dubbo:service interface="com.myblog.portal.service.ArticleInteractionService" ref="articleInteractionServiceImpl" timeout="10000" retries="0"/>
 </beans>

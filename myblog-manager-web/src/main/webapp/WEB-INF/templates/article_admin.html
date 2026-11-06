@@ -14,6 +14,7 @@
 <body id="article-admin"
       th:attr="data-list-url=@{/article/list},data-delete-url=@{/article/del/},data-detail-url=@{/article/get/},data-add-url=@{/article/add},data-update-url=@{/article/update},data-upload-url=@{/upload},data-status-url=@{/article/status/}">
 <div class="dvcontent">
+    <nav aria-label="后台功能"><a th:href="@{/comment_admin}">评论审核</a></nav>
     <div id="admin-message" class="alert" role="status" aria-live="polite" style="display: none;"></div>
 
     <div>

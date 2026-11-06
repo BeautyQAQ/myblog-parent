@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.myblog.mapper.CommentMapper">
+    <resultMap id="Comment" type="com.myblog.pojo.ArticleComment">
+        <id column="id" property="id"/>
+        <result column="article_id" property="articleId"/>
+        <result column="user_id" property="userId"/>
+        <result column="username" property="username"/>
+        <result column="article_title" property="articleTitle"/>
+        <result column="content" property="content"/>
+        <result column="status" property="status"/>
+        <result column="created" property="created"/>
+        <result column="moderated_by" property="moderatedBy"/>
+        <result column="moderated_at" property="moderatedAt"/>
+    </resultMap>
+    <sql id="Columns">c.id, c.article_id, c.user_id, c.content, c.status, c.created,
+        c.moderated_by, c.moderated_at, u.username, a.article_title</sql>
+    <sql id="Joined">tb_comment c JOIN tb_user u ON u.id = c.user_id JOIN tb_article a ON a.article_id = c.article_id</sql>
+    <select id="selectArticleStatus" resultType="string">
+        SELECT article_status FROM tb_article WHERE article_id = #{articleId,jdbcType=INTEGER}
+    </select>
+    <resultMap id="LockedArticle" type="com.myblog.pojo.TbArticle">
+        <id column="article_id" property="articleId"/>
+        <result column="article_status" property="articleStatus"/>
+        <result column="article_title" property="articleTitle"/>
+    </resultMap>
+    <select id="lockArticle" resultMap="LockedArticle">
+        SELECT article_id, article_status, article_title FROM tb_article WHERE article_id = #{articleId,jdbcType=INTEGER} FOR UPDATE
+    </select>
+    <select id="selectById" resultMap="Comment">
+        SELECT <include refid="Columns"/> FROM <include refid="Joined"/> WHERE c.id = #{id,jdbcType=BIGINT}
+    </select>
+    <!-- Lock only comment rows: joining users here would invert author/article lock ordering. -->
+    <select id="selectForUpdate" resultMap="Comment">
+        SELECT * FROM tb_comment WHERE id = #{id,jdbcType=BIGINT} FOR UPDATE
+    </select>
+    <select id="selectRequestForUpdate" resultMap="Comment">
+        SELECT * FROM tb_comment WHERE user_id = #{userId,jdbcType=BIGINT}
+          AND request_id = #{requestId,jdbcType=CHAR} FOR UPDATE
+    </select>
+    <insert id="insertPending">
+        INSERT INTO tb_comment(article_id, user_id, content, request_id, status)
+        VALUES (#{articleId,jdbcType=INTEGER}, #{userId,jdbcType=BIGINT}, #{content,jdbcType=LONGVARCHAR},
+                #{requestId,jdbcType=CHAR}, 'PENDING')
+        ON DUPLICATE KEY UPDATE id = id
+    </insert>
+    <update id="updateStatus">
+        UPDATE tb_comment SET status = #{status,jdbcType=VARCHAR},
+          moderated_by = #{moderatedBy,jdbcType=BIGINT}, moderated_at = CURRENT_TIMESTAMP(6)
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+    <update id="changeApprovedCount">
+        UPDATE tb_article SET article_comment = GREATEST(0, LEAST(2147483647, article_comment + #{delta,jdbcType=INTEGER}))
+        WHERE article_id = #{articleId,jdbcType=INTEGER}
+    </update>
+    <sql id="Filters">
+        <where>
+            <if test="articleId != null">c.article_id = #{articleId,jdbcType=INTEGER}</if>
+            <if test="userId != null">AND c.user_id = #{userId,jdbcType=BIGINT} AND c.status != 'DELETED'</if>
+            <if test="status != null">AND c.status = #{status,jdbcType=VARCHAR}</if>
+        </where>
+    </sql>
+    <select id="countComments" resultType="long">
+        SELECT COUNT(*) FROM tb_comment c <include refid="Filters"/>
+    </select>
+    <select id="selectComments" resultMap="Comment">
+        SELECT <include refid="Columns"/> FROM <include refid="Joined"/> <include refid="Filters"/>
+        ORDER BY c.created DESC, c.id DESC
+        LIMIT #{limit,jdbcType=INTEGER} OFFSET #{offset,jdbcType=BIGINT}
+    </select>
+</mapper>

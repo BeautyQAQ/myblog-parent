@@ -1,0 +1,11 @@
+.comment-admin { max-width: 1100px; padding: 24px; }
+.comment-admin h1 { font-size: 26px; margin: 20px 0 14px; }
+.comment-filter { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 12px; margin: 22px 0; }
+.comment-filter .form-group { margin: 0; }
+.comment-filter input { max-width: 230px; }
+.comment-card { border: 1px solid #ddd; border-radius: 5px; padding: 18px; margin-bottom: 16px; overflow-wrap: anywhere; }
+.comment-card h2 { font-size: 18px; margin: 0 0 12px; }
+.comment-content { white-space: pre-wrap; overflow-wrap: anywhere; padding: 12px; background: #f7f8fa; border-radius: 3px; }
+.comment-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.comment-pagination { display: flex; align-items: center; gap: 14px; margin: 20px 0; }
+#comment-message { min-height: 24px; }
